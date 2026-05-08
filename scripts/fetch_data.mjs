@@ -85,8 +85,8 @@ function mergeSheets(sheets) {
       brk:          num(r["Brk%"]),         // Break %
       pts_rg:       num(r["Pts/RG"]),       // Points per return game
       ptsw_rg:      num(r["PtsW/RG"]),      // Points won per return game
-      opp_rnk_med:  num(r["Opp Rnk Med"] ?? r["OppRnkMed"] ?? r["oRkMed"]),  // Median opp rank
-      opp_rnk_avg:  num(r["Opp Rnk Avg"] ?? r["OppRnkAvg"] ?? r["oRkAvg"]),  // Avg opp rank
+      opp_rnk_med:  num(r["MdOppRk"]),   // Median opp rank
+      opp_rnk_avg:  num(r["MnOppRk"]),   // Avg opp rank
 
       // ── Breaks ─────────────────────────────────────────────────
       bpconv:   num(r["BPConv%"]),   // BP Converted %
@@ -108,9 +108,9 @@ function mergeSheets(sheets) {
       tie:      num(r["TB W%"]),                                       // Tiebreak Won %
       setwon:   num(r["S W%"]),                                        // Set Won %
       gwon:     num(r["G W%"]),                                        // Games Won %
-      dur_m:    num(r["Min/M"]  ?? r["Mins/M"] ?? r["Dur/M"]),        // Match duration (min)
-      dur_s:    num(r["Min/S"]  ?? r["Mins/S"] ?? r["Dur/S"]),        // Set duration (min)
-      dur_pt:   num(r["Sec/Pt"] ?? r["Secs/Pt"] ?? r["Dur/Pt"]),     // Point duration (sec)
+      dur_m:    num(r["Time/Mt"]),   // Match duration (min)
+      dur_s:    num(r["Min/Set"]),  // Set duration (min)
+      dur_pt:   num(r["Sec/Pt"]),   // Point duration (sec)
     }))
     .sort((a, b) => a.rank - b.rank);
 }
