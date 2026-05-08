@@ -76,33 +76,41 @@ function mergeSheets(sheets) {
       ptsl_sg:  num(r["PtsL/SG"]),   // Points lost per service game
 
       // ── Return ─────────────────────────────────────────────────
-      ret:      num(r["RPW"]),       // Return Points Won %
-      ret_inp:  num(r["RPW-InP"]),   // RPW in pressure
-      r1w:      num(r["v1st%"]),     // 1st Return Won %
-      r2w:      num(r["v2nd%"]),     // 2nd Return Won %
-      brk:      num(r["Brk%"]),      // Break %
-      vace:     num(r["vAce%"]),     // Ace% faced
-      vdf:      num(r["vDF%"]),      // DF% forced
-      pts_rg:   num(r["Pts/RG"]),    // Points per return game
-      ptsw_rg:  num(r["PtsW/RG"]),   // Points won per return game
+      ret:          num(r["RPW"]),          // Return Points Won %
+      ret_inp:      num(r["RPW-InP"]),      // RPW in pressure
+      vace:         num(r["vAce%"]),        // Ace% faced
+      vdf:          num(r["vDF%"]),         // DF% forced
+      r1w:          num(r["v1st%"]),        // 1st Return Won %
+      r2w:          num(r["v2nd%"]),        // 2nd Return Won %
+      brk:          num(r["Brk%"]),         // Break %
+      pts_rg:       num(r["Pts/RG"]),       // Points per return game
+      ptsw_rg:      num(r["PtsW/RG"]),      // Points won per return game
+      opp_rnk_med:  num(r["Opp Rnk Med"] ?? r["OppRnkMed"] ?? r["oRkMed"]),  // Median opp rank
+      opp_rnk_avg:  num(r["Opp Rnk Avg"] ?? r["OppRnkAvg"] ?? r["oRkAvg"]),  // Avg opp rank
 
       // ── Breaks ─────────────────────────────────────────────────
       bpconv:   num(r["BPConv%"]),   // BP Converted %
       bp_g:     num(r["BP/G"]),      // BP created per return game
       bp_s:     num(r["BP/S"]),      // BP created per set
+      bp_m:     num(r["BP/M"]),      // BP created per match
       bks_s:    num(r["Bks/S"]),     // Breaks per set (as returner)
+      bks_m:    num(r["Bks/M"]),     // Breaks per match (as returner)
       bpsaved:  num(r["BPSvd%"]),    // BP Saved %
       bpfaced:  num(r["BPvs/G"]),    // BP faced per service game
       bpvs_s:   num(r["BPvs/S"]),    // BP faced per set (as server)
+      bpvs_m:   num(r["BPvs/M"]),    // BP faced per match (as server)
       bkn_s:    num(r["Bkn/S"]),     // Broken per set
+      bkn_m:    num(r["Bkn/M"]),     // Broken per match
 
       // ── More ───────────────────────────────────────────────────
-      tpw:      num(r["TPW%"]),      // Total Points Won %
-      dr:       num(r["DR"]),        // Dominance Ratio
-      setwon:   num(r["S W%"]),      // Set Won %
-      tie:      num(r["TB W%"]),     // Tiebreak Won %
-      tb_s:     num(r["TB/S"]),      // Tiebreaks per set
-      gwon:     num(r["G W%"]),      // Games Won %
+      dr:       num(r["DR"]),                                          // Dominance Ratio
+      tpw:      num(r["TPW%"]),                                        // Total Points Won %
+      tie:      num(r["TB W%"]),                                       // Tiebreak Won %
+      setwon:   num(r["S W%"]),                                        // Set Won %
+      gwon:     num(r["G W%"]),                                        // Games Won %
+      dur_m:    num(r["Min/M"]  ?? r["Mins/M"] ?? r["Dur/M"]),        // Match duration (min)
+      dur_s:    num(r["Min/S"]  ?? r["Mins/S"] ?? r["Dur/S"]),        // Set duration (min)
+      dur_pt:   num(r["Sec/Pt"] ?? r["Secs/Pt"] ?? r["Dur/Pt"]),     // Point duration (sec)
     }))
     .sort((a, b) => a.rank - b.rank);
 }
