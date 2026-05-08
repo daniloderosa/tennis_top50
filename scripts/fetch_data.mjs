@@ -22,19 +22,15 @@ function parseCsv(text) {
   const lines = text.trim().split("\n");
   if (lines.length < 2) return [];
   const headers = splitCsvLine(lines[0]);
-  return lines.slice(1).map((line) => {
-    const values = splitCsvLine(line);
-    return Object.fromEntries(headers.map((h, i) => [h.trim(), (values[i] ?? "").trim()]));
-  }).filter((row) => Object.values(row).some((v) => v !== ""));
+  return lines.slice(1)
+    .map((line) => Object.fromEntries(headers.map((h, i) => [h.trim(), (splitCsvLine(line)[i] ?? "").trim()])))
+    .filter((row) => Object.values(row).some((v) => v !== ""));
 }
 
 function splitCsvLine(line) {
-  // Gestisce virgolette e valori con virgola
   const result = [];
-  let current = "";
-  let inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
+  let current = "", inQuotes = false;
+  for (const ch of line) {
     if (ch === '"') { inQuotes = !inQuotes; continue; }
     if (ch === "," && !inQuotes) { result.push(current); current = ""; continue; }
     current += ch;
@@ -43,15 +39,15 @@ function splitCsvLine(line) {
   return result;
 }
 
-function num(val, fallback = null) {
-  if (val === undefined || val === null || val === "") return fallback;
+function num(val) {
+  if (val === undefined || val === null || val === "") return null;
   const n = parseFloat(String(val).replace("%", "").replace(",", ".").trim());
-  return isNaN(n) ? fallback : n;
+  return isNaN(n) ? null : n;
 }
 
 function mergeSheets(sheets) {
   const byPlayer = {};
-  for (const [, rows] of Object.entries(sheets)) {
+  for (const rows of Object.values(sheets)) {
     for (const row of rows) {
       const name = (row["Player"] ?? "").trim();
       if (!name) continue;
@@ -60,32 +56,53 @@ function mergeSheets(sheets) {
   }
 
   return Object.entries(byPlayer)
-    .map(([name, row]) => ({
-      rank:       Math.round(num(row["Rk"] ?? row["Rank"], 999)),
-      full:       name,
-      nat:        (row["IOC"] ?? row["Nat"] ?? "").trim(),
-      // Serve
-      spw:        num(row["SPW"]),
-      s1:         num(row["1stIn"]),
-      s1w:        num(row["1stWon"]),
-      s2w:        num(row["2ndWon"]),
-      hold:       num(row["Hold"]),
-      ace:        num(row["Ace"]),
-      df:         num(row["DF"]),
-      // Return
-      r1w:        num(row["1stRet"]),
-      r2w:        num(row["2ndRet"]),
-      ret:        num(row["Ret"]),
-      brk:        num(row["Brk"]),
-      // Breaks
-      bpsaved:    num(row["BPS"]),
-      bpconv:     num(row["BPW"]),
-      bpfaced:    num(row["BPF"]),
-      bpcreated:  num(row["BPC"]),
-      // More (esclusi M, M W-L, M%)
-      setwon:     num(row["Set%"]),
-      tie:        num(row["TB%"]),
-      decset:     num(row["Dec%"]),
+    .map(([name, r]) => ({
+      rank: Math.round(num(r["Rk"] ?? r["Rank"]) ?? 999),
+      full: name,
+      nat:  (r["Country"] ?? r["IOC"] ?? r["Nat"] ?? "").trim(),
+
+      // ── Serve ──────────────────────────────────────────────────
+      spw:      num(r["SPW"]),       // Serve Points Won %
+      spw_inp:  num(r["SPW-InP"]),   // SPW in pressure points
+      s1:       num(r["1stIn"]),     // 1st Serve In %
+      s1w:      num(r["1st%"]),      // 1st Serve Won %
+      s2w:      num(r["2nd%"]),      // 2nd Serve Won %
+      s2w_inp:  num(r["2%-InP"]),    // 2nd Serve Won % in pressure
+      hold:     num(r["Hld%"]),      // Hold %
+      ace:      num(r["Ace%"]),      // Ace %
+      df:       num(r["DF%"]),       // DF %
+      df2s:     num(r["DF/2s"]),     // DF % on 2nd serve
+      pts_sg:   num(r["Pts/SG"]),    // Points per service game
+      ptsl_sg:  num(r["PtsL/SG"]),   // Points lost per service game
+
+      // ── Return ─────────────────────────────────────────────────
+      ret:      num(r["RPW"]),       // Return Points Won %
+      ret_inp:  num(r["RPW-InP"]),   // RPW in pressure
+      r1w:      num(r["v1st%"]),     // 1st Return Won %
+      r2w:      num(r["v2nd%"]),     // 2nd Return Won %
+      brk:      num(r["Brk%"]),      // Break %
+      vace:     num(r["vAce%"]),     // Ace% faced
+      vdf:      num(r["vDF%"]),      // DF% forced
+      pts_rg:   num(r["Pts/RG"]),    // Points per return game
+      ptsw_rg:  num(r["PtsW/RG"]),   // Points won per return game
+
+      // ── Breaks ─────────────────────────────────────────────────
+      bpconv:   num(r["BPConv%"]),   // BP Converted %
+      bp_g:     num(r["BP/G"]),      // BP created per return game
+      bp_s:     num(r["BP/S"]),      // BP created per set
+      bks_s:    num(r["Bks/S"]),     // Breaks per set (as returner)
+      bpsaved:  num(r["BPSvd%"]),    // BP Saved %
+      bpfaced:  num(r["BPvs/G"]),    // BP faced per service game
+      bpvs_s:   num(r["BPvs/S"]),    // BP faced per set (as server)
+      bkn_s:    num(r["Bkn/S"]),     // Broken per set
+
+      // ── More ───────────────────────────────────────────────────
+      tpw:      num(r["TPW%"]),      // Total Points Won %
+      dr:       num(r["DR"]),        // Dominance Ratio
+      setwon:   num(r["S W%"]),      // Set Won %
+      tie:      num(r["TB W%"]),     // Tiebreak Won %
+      tb_s:     num(r["TB/S"]),      // Tiebreaks per set
+      gwon:     num(r["G W%"]),      // Games Won %
     }))
     .sort((a, b) => a.rank - b.rank);
 }
@@ -108,7 +125,7 @@ async function main() {
 
   if (players[0]) {
     const p = players[0];
-    console.log(`\nEsempio #${p.rank} ${p.full}: s1=${p.s1} hold=${p.hold} ace=${p.ace}`);
+    console.log(`\nEsempio #${p.rank} ${p.full}: spw=${p.spw} hold=${p.hold} ace=${p.ace}`);
   }
 }
 

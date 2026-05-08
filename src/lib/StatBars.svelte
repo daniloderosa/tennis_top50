@@ -12,23 +12,23 @@
     {@const isPercent = stat.unit === '%'}
     {@const mn = stat.min ?? 0}
     {@const mx = stat.max ?? 100}
-    {@const pct = isPercent
+    {@const pct = raw == null ? null : isPercent
       ? Math.max(0, Math.min(100, raw))
       : Math.max(0, Math.min(100, ((raw - mn) / (mx - mn)) * 100))}
-    <!-- flip: lower is better — invert bar length -->
-    {@const barPct = stat.flip ? Math.max(0, Math.min(100, 100 - pct)) : pct}
+    {@const barPct = pct == null ? 0 : (stat.flip ? Math.max(0, Math.min(100, 100 - pct)) : pct)}
+    {@const display = raw == null ? '—' : `${raw}${stat.unit}`}
 
     <div class="stat-row">
       <div class="stat-meta">
         <span class="stat-label">{stat.label}</span>
-        <span class="stat-value" style="color: {color}">
-          {raw}{stat.unit}
+        <span class="stat-value" style="color: {raw == null ? 'var(--muted)' : color}">
+          {display}
         </span>
       </div>
       <div class="bar-track" style="background: {color}18">
         <div
           class="bar-fill"
-          style="width: {barPct}%; background: {color};"
+          style="width: {barPct}%; background: {color}; opacity: {raw == null ? 0.3 : 1};"
         />
       </div>
     </div>
