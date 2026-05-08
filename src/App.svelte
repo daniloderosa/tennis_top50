@@ -1,5 +1,5 @@
 <script>
-  import { PLAYERS, TAB_KEYS } from './lib/data.js';
+  import { PLAYERS, TAB_KEYS, getTabRadarData } from './lib/data.js';
   import RadarChart from './lib/RadarChart.svelte';
   import StatBars from './lib/StatBars.svelte';
   import PlayerSelector from './lib/PlayerSelector.svelte';
@@ -17,6 +17,7 @@
 
   $: p1 = PLAYERS.find(p => p.rank === p1rank) ?? PLAYERS[0];
   $: p2 = PLAYERS.find(p => p.rank === p2rank) ?? PLAYERS[1];
+  $: radarData = getTabRadarData(tab);
 
   $: { localStorage.setItem('atpb50_p1', p1rank); }
   $: { localStorage.setItem('atpb50_p2', p2rank); }
@@ -88,7 +89,7 @@
 
       <!-- Radar + legend -->
       <div class="col-radar card radar-col">
-        <RadarChart {p1} {p2} c1={C1} c2={C2} />
+        <RadarChart {p1} {p2} c1={C1} c2={C2} axes={radarData.axes} avgVals={radarData.avg} />
         <div class="radar-legend">
           <svg width="22" height="6">
             <line x1="0" y1="3" x2="22" y2="3" stroke="var(--avg)" stroke-width="2" stroke-dasharray="4 3" />
