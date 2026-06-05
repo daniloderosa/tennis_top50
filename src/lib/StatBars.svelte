@@ -1,5 +1,5 @@
 <script>
-  import { STAT_TABS } from './data.js';
+  import { STAT_TABS, STAT_RANGES } from './data.js';
 
   export let player;
   export let color;
@@ -10,8 +10,9 @@
   {#each STAT_TABS[tab] as stat (stat.key)}
     {@const raw = player[stat.key]}
     {@const isPercent = stat.unit === '%'}
-    {@const mn = stat.min ?? 0}
-    {@const mx = stat.max ?? 100}
+    {@const range = STAT_RANGES[stat.key]}
+    {@const mn = range?.min ?? 0}
+    {@const mx = range?.max ?? 1}
     {@const pct = raw == null ? null : isPercent
       ? Math.max(0, Math.min(100, raw))
       : Math.max(0, Math.min(100, ((raw - mn) / (mx - mn)) * 100))}

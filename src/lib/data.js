@@ -14,7 +14,7 @@ export const RADAR_AXES = [
   { key: 'r1w',  label: '1° Ret',       min: 25, max: 39 },
 ];
 
-// Sezioni barre — ordine = ordine colonne foglio Google, solo campi Y
+// Sezioni barre — nessun min/max hardcoded: vengono calcolati da STAT_RANGES
 export const STAT_TABS = {
   Servizio: [
     { key: 'spw',     label: 'Punti vinti al servizio',                         short: '% punti srv',       unit: '%', flip: false },
@@ -27,8 +27,8 @@ export const STAT_TABS = {
     { key: 's2w',     label: 'Punti vinti con la seconda %',                     short: '% vinti 2ª srv',    unit: '%', flip: false },
     { key: 's2w_inp', label: 'Punti vinti con la seconda (escl. doppi falli) %', short: '% 2ª pressione',    unit: '%', flip: false },
     { key: 'hold',    label: 'Game vinti al servizio %',                         short: 'Hold %',            unit: '%', flip: false },
-    { key: 'pts_sg',  label: 'Punti giocati per game al servizio',               short: 'Punti/game srv',    unit: '',  flip: false, min: 3.5, max: 5.5 },
-    { key: 'ptsl_sg', label: 'Punti persi per game al servizio',                 short: 'Persi/game srv',    unit: '',  flip: true,  min: 1.5, max: 3.5 },
+    { key: 'pts_sg',  label: 'Punti giocati per game al servizio',               short: 'Punti/game srv',    unit: '',  flip: false },
+    { key: 'ptsl_sg', label: 'Punti persi per game al servizio',                 short: 'Persi/game srv',    unit: '',  flip: true  },
   ],
   Risposta: [
     { key: 'ret',         label: 'Punti in risposta vinti %',                        short: '% punti risp',       unit: '%', flip: false },
@@ -38,27 +38,27 @@ export const STAT_TABS = {
     { key: 'r1w',         label: 'Punti vinti in risposta alla prima %',             short: '% vinti vs 1ª',      unit: '%', flip: false },
     { key: 'r2w',         label: 'Punti vinti in risposta alla seconda %',           short: '% vinti vs 2ª',      unit: '%', flip: false },
     { key: 'brk',         label: 'Break %',                                          short: 'Break %',            unit: '%', flip: false },
-    { key: 'pts_rg',      label: 'Punti giocati per game in risposta',               short: 'Punti/game risp',    unit: '',  flip: false, min: 3.0, max: 5.0 },
-    { key: 'ptsw_rg',     label: 'Punti vinti per game in risposta',                 short: 'Vinti/game risp',    unit: '',  flip: false, min: 1.0, max: 3.0 },
+    { key: 'pts_rg',      label: 'Punti giocati per game in risposta',               short: 'Punti/game risp',    unit: '',  flip: false },
+    { key: 'ptsw_rg',     label: 'Punti vinti per game in risposta',                 short: 'Vinti/game risp',    unit: '',  flip: false },
     { key: 'opp_rnk_med', label: 'Classifica mediana avversari',                     short: 'Rank avv. mediano',  unit: '',  flip: false },
     { key: 'opp_rnk_avg', label: 'Classifica media avversari',                       short: 'Rank avv. medio',    unit: '',  flip: false },
   ],
   'Palle Break': [
     { key: 'bpconv',  label: 'Palle break convertite %',          short: '% PB conv.',        unit: '%', flip: false },
-    { key: 'bp_g',    label: 'Palle break per game',              short: 'PB/game',           unit: '',  flip: false, min: 0.2, max: 0.9 },
-    { key: 'bp_s',    label: 'Palle break per set',               short: 'PB/set',            unit: '',  flip: false, min: 0.8, max: 3.5 },
+    { key: 'bp_g',    label: 'Palle break per game',              short: 'PB/game',           unit: '',  flip: false },
+    { key: 'bp_s',    label: 'Palle break per set',               short: 'PB/set',            unit: '',  flip: false },
     { key: 'bp_m',    label: 'Palle break per match',             short: 'PB/match',          unit: '',  flip: false },
-    { key: 'bks_s',   label: 'Break per set',                     short: 'Break/set',         unit: '',  flip: false, min: 0.2, max: 1.2 },
+    { key: 'bks_s',   label: 'Break per set',                     short: 'Break/set',         unit: '',  flip: false },
     { key: 'bks_m',   label: 'Break per match',                   short: 'Break/match',       unit: '',  flip: false },
     { key: 'bpsaved', label: 'Palle break salvate %',             short: '% PB salvate',      unit: '%', flip: false },
-    { key: 'bpfaced', label: 'Palle break concesse per game',     short: 'PB conc./game',     unit: '',  flip: true,  min: 0.2, max: 0.9 },
-    { key: 'bpvs_s',  label: 'Palle break concesse per set',      short: 'PB conc./set',      unit: '',  flip: true,  min: 0.8, max: 3.5 },
+    { key: 'bpfaced', label: 'Palle break concesse per game',     short: 'PB conc./game',     unit: '',  flip: true  },
+    { key: 'bpvs_s',  label: 'Palle break concesse per set',      short: 'PB conc./set',      unit: '',  flip: true  },
     { key: 'bpvs_m',  label: 'Palle break concesse per match',    short: 'PB conc./match',    unit: '',  flip: true  },
-    { key: 'bkn_s',   label: 'Break subiti per set',              short: 'Broken/set',        unit: '',  flip: true,  min: 0.1, max: 0.8 },
+    { key: 'bkn_s',   label: 'Break subiti per set',              short: 'Broken/set',        unit: '',  flip: true  },
     { key: 'bkn_m',   label: 'Break subiti per match',            short: 'Broken/match',      unit: '',  flip: true  },
   ],
   Altro: [
-    { key: 'dr',     label: 'Dominance Ratio',      short: 'Dom. Ratio',     unit: '',  flip: false, min: 0.7, max: 1.5 },
+    { key: 'dr',     label: 'Dominance Ratio',      short: 'Dom. Ratio',     unit: '',  flip: false },
     { key: 'tpw',    label: 'Punti vinti %',         short: '% punti totali', unit: '%', flip: false },
     { key: 'tie',    label: 'Tiebreak vinti %',      short: '% TB vinti',     unit: '%', flip: false },
     { key: 'setwon', label: 'Set vinti %',            short: '% set vinti',    unit: '%', flip: false },
@@ -70,6 +70,22 @@ export const STAT_TABS = {
 };
 
 export const TAB_KEYS = Object.keys(STAT_TABS);
+
+// Min/max calcolati dai dati reali del top-50 per ogni stat non-%
+// Usati da StatBars (barre) e getTabRadarData (radar)
+export const STAT_RANGES = (() => {
+  const ranges = {};
+  for (const stats of Object.values(STAT_TABS)) {
+    for (const stat of stats) {
+      if (stat.unit === '%') continue;
+      const vals = PLAYERS.map(p => p[stat.key]).filter(v => v != null);
+      if (vals.length > 0) {
+        ranges[stat.key] = { min: Math.min(...vals), max: Math.max(...vals) };
+      }
+    }
+  }
+  return ranges;
+})();
 
 export const TOP50_AVG = RADAR_AXES.map(ax => {
   const vals = PLAYERS.map(p => p[ax.key]).filter(v => v != null);
@@ -84,13 +100,18 @@ export function norm(v, min, max) {
 export function getTabRadarData(tabKey) {
   const stats = STAT_TABS[tabKey] ?? [];
   const axes = stats.map(stat => {
-    let min = stat.min;
-    let max = stat.max;
-    if (min == null || max == null) {
+    let min, max;
+    if (stat.unit === '%') {
+      // Per le % usiamo il range reale del top-50, non 0-100
       const vals = PLAYERS.map(p => p[stat.key]).filter(v => v != null);
       if (vals.length === 0) return null;
       min = Math.min(...vals);
       max = Math.max(...vals);
+    } else {
+      const range = STAT_RANGES[stat.key];
+      if (!range) return null;
+      min = range.min;
+      max = range.max;
     }
     if (max <= min) return null;
     return { key: stat.key, label: stat.label, short: stat.short, unit: stat.unit ?? '', min, max, flip: stat.flip ?? false };
