@@ -26,30 +26,9 @@
   function selectP1(e) { p1rank = e.detail; }
   function selectP2(e) { p2rank = e.detail; }
 
-  // ── Debug panel ──────────────────────────────────────────────
-  let showDebug   = true;
-  let padH        = 0;
-  let maxW        = 1660;
-  let fsBarLabel  = 17;
-  let fsBarValue  = 28;
-  let fsPlayer    = 27;
-  let fsTabs      = 18;
-  let fsRadar     = 15;   // SVG user-unit font size for radar labels
-  let colW        = 330;  // px width of each stats column
-  let radarSize   = 510;  // px rendered size of radar SVG
-
-  $: cssVars = [
-    `--pad-h:${padH}px`,
-    `--max-w:${maxW}px`,
-    `--fs-bar-label:${fsBarLabel}px`,
-    `--fs-bar-value:${fsBarValue}px`,
-    `--fs-player:${fsPlayer}px`,
-    `--fs-tabs:${fsTabs}px`,
-    `--col-w:${colW}px`,
-  ].join(';');
 </script>
 
-<div class="app" style={cssVars}>
+<div class="app">
   <!-- HEADER -->
   <header>
     <div class="header-title">
@@ -105,8 +84,8 @@
         <RadarChart
           {p1} {p2} c1={C1} c2={C2}
           axes={radarData.axes} avgVals={radarData.avg}
-          size={radarSize}
-          fsLabel={fsRadar}
+          size={510}
+          fsLabel={15}
         />
         <div class="radar-footer">
           <div class="radar-legend">
@@ -141,76 +120,6 @@
     </div>
   </footer>
 
-  <!-- DEBUG PANEL -->
-  {#if showDebug}
-  <div class="debug-panel">
-    <div class="debug-header">
-      <span>⚙ Debug layout</span>
-      <button class="debug-close" on:click={() => (showDebug = false)}>×</button>
-    </div>
-
-    <div class="debug-group">
-      <div class="debug-group-title">Layout</div>
-      <div class="debug-row">
-        <label>Margine H <strong>{padH}px</strong></label>
-        <input type="range" min="0" max="80" step="2" bind:value={padH} />
-      </div>
-      <div class="debug-row">
-        <label>Max width <strong>{maxW}px</strong></label>
-        <input type="range" min="800" max="1800" step="20" bind:value={maxW} />
-      </div>
-      <div class="debug-row">
-        <label>Largh. colonne stat <strong>{colW}px</strong></label>
-        <input type="range" min="160" max="480" step="10" bind:value={colW} />
-      </div>
-    </div>
-
-    <div class="debug-group">
-      <div class="debug-group-title">Font barre</div>
-      <div class="debug-row">
-        <label>Etichetta stat <strong>{fsBarLabel}px</strong></label>
-        <input type="range" min="9" max="20" bind:value={fsBarLabel} />
-      </div>
-      <div class="debug-row">
-        <label>Valore stat <strong>{fsBarValue}px</strong></label>
-        <input type="range" min="12" max="34" bind:value={fsBarValue} />
-      </div>
-    </div>
-
-    <div class="debug-group">
-      <div class="debug-group-title">Font selettori / tab</div>
-      <div class="debug-row">
-        <label>Nome giocatore <strong>{fsPlayer}px</strong></label>
-        <input type="range" min="14" max="36" bind:value={fsPlayer} />
-      </div>
-      <div class="debug-row">
-        <label>Tab <strong>{fsTabs}px</strong></label>
-        <input type="range" min="10" max="24" bind:value={fsTabs} />
-      </div>
-    </div>
-
-    <div class="debug-group">
-      <div class="debug-group-title">Radar</div>
-      <div class="debug-row">
-        <label>Dimensione <strong>{radarSize}px</strong></label>
-        <input type="range" min="260" max="600" step="10" bind:value={radarSize} />
-      </div>
-      <div class="debug-row">
-        <label>Font etichette <strong>{fsRadar}</strong></label>
-        <input type="range" min="7" max="18" bind:value={fsRadar} />
-      </div>
-    </div>
-
-    <div class="debug-values">
-      padH={padH} · maxW={maxW} · colW={colW}<br/>
-      fsBarLabel={fsBarLabel} · fsBarValue={fsBarValue}<br/>
-      fsPlayer={fsPlayer} · fsTabs={fsTabs}<br/>
-      radarSize={radarSize} · fsRadar={fsRadar}
-    </div>
-  </div>
-  {:else}
-  <button class="debug-toggle" on:click={() => (showDebug = true)}>⚙</button>
-  {/if}
 </div>
 
 <style>
@@ -227,6 +136,10 @@
     --avg:   #9aada0;
     --txt:   #1a2e20;
     --muted: #7a9882;
+    --fs-bar-label: 17px;
+    --fs-bar-value: 28px;
+    --fs-player:    27px;
+    --fs-tabs:      18px;
   }
 
   :global(html, body) {
@@ -282,10 +195,10 @@
   /* ── MAIN ── */
   main {
     flex: 1;
-    max-width: var(--max-w, 1660px);
+    max-width: 1660px;
     width: 100%;
     margin: 0 auto;
-    padding: 12px var(--pad-h, 0px);
+    padding: 12px 0;
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -383,7 +296,7 @@
 
   /* Row 3: fills remaining height */
   .row-main {
-    grid-template-columns: var(--col-w, 240px) 1fr var(--col-w, 240px);
+    grid-template-columns: 330px 1fr 330px;
     align-items: stretch;
     flex: 1;
     min-height: 0;
@@ -484,98 +397,4 @@
     color: var(--txt);
   }
 
-  /* ── DEBUG PANEL ── */
-  .debug-panel {
-    position: fixed;
-    bottom: 16px;
-    right: 16px;
-    background: var(--surf);
-    border: 1.5px solid var(--bord);
-    border-radius: 10px;
-    padding: 12px 14px;
-    z-index: 1000;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.13);
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-width: 240px;
-    max-height: 90vh;
-    overflow-y: auto;
-    font-family: 'Barlow', sans-serif;
-  }
-
-  .debug-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--txt);
-    margin-bottom: 2px;
-  }
-
-  .debug-close { font-size: 18px; color: var(--muted); line-height: 1; padding: 0 2px; }
-
-  .debug-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    border-top: 1px solid var(--surf2);
-    padding-top: 6px;
-  }
-
-  .debug-group-title {
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--accent);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-
-  .debug-row { display: flex; flex-direction: column; gap: 1px; }
-
-  .debug-row label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 11px;
-    color: var(--muted);
-  }
-
-  .debug-row label strong { color: var(--txt); }
-
-  .debug-row input[type="range"] {
-    width: 100%;
-    cursor: pointer;
-    accent-color: var(--accent);
-  }
-
-  .debug-values {
-    font-size: 10px;
-    color: var(--muted);
-    background: var(--surf2);
-    border-radius: 5px;
-    padding: 6px 8px;
-    line-height: 1.8;
-    font-family: monospace;
-    user-select: all;
-    margin-top: 2px;
-  }
-
-  .debug-toggle {
-    position: fixed;
-    bottom: 16px;
-    right: 16px;
-    background: var(--surf);
-    border: 1.5px solid var(--bord);
-    border-radius: 8px;
-    width: 36px;
-    height: 36px;
-    cursor: pointer;
-    z-index: 1000;
-    font-size: 16px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  }
 </style>
