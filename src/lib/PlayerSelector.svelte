@@ -19,7 +19,7 @@
       p.nat.toLowerCase().includes(q) ||
       String(p.rank).includes(q)
     );
-  }).slice(0, 14);
+  });
 
   function select(p) {
     if (p.rank !== otherRank) {

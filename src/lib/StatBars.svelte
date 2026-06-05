@@ -57,7 +57,7 @@
 
   .stat-label {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
+    font-size: var(--fs-bar-label, 13px);
     color: var(--muted);
     letter-spacing: 0.04em;
     text-transform: uppercase;
@@ -65,7 +65,7 @@
 
   .stat-value {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 20px;
+    font-size: var(--fs-bar-value, 20px);
     font-weight: 700;
     line-height: 1;
   }

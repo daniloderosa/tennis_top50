@@ -23,16 +23,29 @@
   $: { localStorage.setItem('atpb50_p2', p2rank); }
   $: { localStorage.setItem('atpb50_tab', tab); }
 
-  function selectP1(e) {
-    p1rank = e.detail;
-  }
+  function selectP1(e) { p1rank = e.detail; }
+  function selectP2(e) { p2rank = e.detail; }
 
-  function selectP2(e) {
-    p2rank = e.detail;
-  }
+  // ── Debug panel ────────────────────────────────────────────────
+  let showDebug = true;
+  let padH      = 12;   // px, horizontal padding of main
+  let maxW      = 1340; // px, max-width of main
+  let fsBarLabel = 13;  // px, stat bar label font size
+  let fsBarValue = 20;  // px, stat bar value font size
+  let fsPlayer   = 22;  // px, player name font size
+  let fsTabs     = 14;  // px, tab button font size
+
+  $: cssVars = [
+    `--pad-h:${padH}px`,
+    `--max-w:${maxW}px`,
+    `--fs-bar-label:${fsBarLabel}px`,
+    `--fs-bar-value:${fsBarValue}px`,
+    `--fs-player:${fsPlayer}px`,
+    `--fs-tabs:${fsTabs}px`,
+  ].join(';');
 </script>
 
-<div class="app">
+<div class="app" style={cssVars}>
   <!-- HEADER -->
   <header>
     <div class="header-title">
@@ -64,7 +77,7 @@
       <PlayerSelector player={p2} color={C2} otherRank={p1rank} on:select={selectP2} />
     </div>
 
-    <!-- ROW 2: tab selezione sezione — riga intera -->
+    <!-- ROW 2: tab selezione sezione -->
     <div class="row row-tabs">
       <div class="tabs">
         {#each TAB_KEYS as t (t)}
@@ -82,12 +95,10 @@
 
     <!-- ROW 3: stat P1 | radar | stat P2 -->
     <div class="row row-main">
-      <!-- P1 stats -->
       <div class="col-stats card">
         <StatBars player={p1} color={C1} {tab} />
       </div>
 
-      <!-- Radar + legend -->
       <div class="col-radar card radar-col">
         <RadarChart {p1} {p2} c1={C1} c2={C2} axes={radarData.axes} avgVals={radarData.avg} />
         <div class="radar-legend">
@@ -99,7 +110,6 @@
         <span class="radar-hint">Passa il mouse sulle etichette per i valori</span>
       </div>
 
-      <!-- P2 stats -->
       <div class="col-stats card">
         <StatBars player={p2} color={C2} {tab} />
       </div>
@@ -112,15 +122,57 @@
       <div class="footer-title" style="color: {ACCENT}">FONTE E METODOLOGIA</div>
       <p class="footer-text">
         Dati basati su statistiche ATP Top 50 tratte da <strong>Tennis Abstract</strong>
-        (tennisabstract.com, Jeff Sackmann). I valori sono placeholder realistici aggiornati alla stagione 2025–26.
+        (tennisabstract.com, Jeff Sackmann). I valori sono aggiornati all'ultima esecuzione di <code>npm run fetch-data</code>.
       </p>
       <p class="footer-text">
-        <strong>Radar:</strong> ogni asse è normalizzato sul range min–max del top 50
-        (es. Hold% 73–93%), evidenziando la posizione relativa tra pari.
-        <strong>H2H:</strong> dati non ancora disponibili — segnaposto in attesa di integrazione.
+        <strong>Radar:</strong> ogni asse è normalizzato sul range min–max del top 50,
+        evidenziando la posizione relativa tra pari. Le stat con <em>flip</em> (es. Doppi Falli)
+        sono invertite: raggio più lungo = prestazione migliore.
+        <strong>H2H:</strong> dati non ancora disponibili.
       </p>
     </div>
   </footer>
+
+  <!-- DEBUG PANEL -->
+  {#if showDebug}
+  <div class="debug-panel">
+    <div class="debug-header">
+      <span>⚙ Debug layout</span>
+      <button class="debug-close" on:click={() => (showDebug = false)}>×</button>
+    </div>
+    <div class="debug-row">
+      <label>Margine H <strong>{padH}px</strong></label>
+      <input type="range" min="0" max="80" step="2" bind:value={padH} />
+    </div>
+    <div class="debug-row">
+      <label>Max width <strong>{maxW}px</strong></label>
+      <input type="range" min="800" max="1800" step="20" bind:value={maxW} />
+    </div>
+    <div class="debug-row">
+      <label>Etichetta stat <strong>{fsBarLabel}px</strong></label>
+      <input type="range" min="9" max="18" bind:value={fsBarLabel} />
+    </div>
+    <div class="debug-row">
+      <label>Valore stat <strong>{fsBarValue}px</strong></label>
+      <input type="range" min="12" max="32" bind:value={fsBarValue} />
+    </div>
+    <div class="debug-row">
+      <label>Nome giocatore <strong>{fsPlayer}px</strong></label>
+      <input type="range" min="14" max="34" bind:value={fsPlayer} />
+    </div>
+    <div class="debug-row">
+      <label>Font tab <strong>{fsTabs}px</strong></label>
+      <input type="range" min="10" max="22" bind:value={fsTabs} />
+    </div>
+    <div class="debug-values">
+      padH={padH} · maxW={maxW}<br/>
+      fsBarLabel={fsBarLabel} · fsBarValue={fsBarValue}<br/>
+      fsPlayer={fsPlayer} · fsTabs={fsTabs}
+    </div>
+  </div>
+  {:else}
+  <button class="debug-toggle" on:click={() => (showDebug = true)}>⚙</button>
+  {/if}
 </div>
 
 <style>
@@ -204,13 +256,14 @@
   /* ── MAIN ── */
   main {
     flex: 1;
-    max-width: 1340px;
+    max-width: var(--max-w, 1340px);
     width: 100%;
     margin: 0 auto;
-    padding: 12px 12px;
+    padding: 12px var(--pad-h, 12px);
     display: flex;
     flex-direction: column;
     gap: 10px;
+    min-height: 0;
   }
 
   .row {
@@ -222,6 +275,7 @@
   .row-selectors {
     grid-template-columns: 1fr 320px 1fr;
     align-items: stretch;
+    flex-shrink: 0;
   }
 
   /* H2H box */
@@ -286,6 +340,7 @@
   /* Row 2: tabs */
   .row-tabs {
     grid-template-columns: 1fr;
+    flex-shrink: 0;
   }
 
   .tabs {
@@ -300,7 +355,7 @@
 
   .tab-btn {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 14px;
+    font-size: var(--fs-tabs, 14px);
     font-weight: 700;
     letter-spacing: 0.05em;
     padding: 7px 28px;
@@ -314,10 +369,12 @@
     color: var(--txt);
   }
 
-  /* Row 3: stats + radar */
+  /* Row 3: stats + radar — fills remaining vertical space */
   .row-main {
     grid-template-columns: 240px 1fr 240px;
     align-items: stretch;
+    flex: 1;
+    min-height: 0;
   }
 
   .card {
@@ -331,6 +388,7 @@
     padding: 14px 16px;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
   }
 
   .col-radar {
@@ -372,6 +430,7 @@
     background: var(--surf2);
     border-top: 1px solid var(--bord);
     padding: 20px 28px;
+    flex-shrink: 0;
   }
 
   .footer-inner {
@@ -397,7 +456,94 @@
     line-height: 1.6;
   }
 
-  .footer-text strong {
+  .footer-text strong { color: var(--txt); }
+  .footer-text code {
+    font-size: 12px;
+    background: var(--bord);
+    padding: 1px 5px;
+    border-radius: 3px;
     color: var(--txt);
+  }
+
+  /* ── DEBUG PANEL ── */
+  .debug-panel {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    background: var(--surf);
+    border: 1.5px solid var(--bord);
+    border-radius: 10px;
+    padding: 12px 14px;
+    z-index: 1000;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.13);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 230px;
+    font-family: 'Barlow', sans-serif;
+  }
+
+  .debug-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--txt);
+  }
+
+  .debug-close {
+    font-size: 18px;
+    color: var(--muted);
+    line-height: 1;
+    padding: 0 2px;
+  }
+
+  .debug-row {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .debug-row label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .debug-row input[type="range"] {
+    width: 100%;
+    cursor: pointer;
+    accent-color: var(--accent);
+  }
+
+  .debug-values {
+    font-size: 10px;
+    color: var(--muted);
+    background: var(--surf2);
+    border-radius: 5px;
+    padding: 6px 8px;
+    line-height: 1.7;
+    font-family: monospace;
+    user-select: all;
+  }
+
+  .debug-toggle {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    background: var(--surf);
+    border: 1.5px solid var(--bord);
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    z-index: 1000;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 </style>

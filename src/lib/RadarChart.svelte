@@ -13,9 +13,9 @@
   const CY = SIZE / 2;
   const R = 148;
   const LABEL_DIST = R + 52;
-  const TIP_DIST = R + 104;
 
   const rings = [0.25, 0.5, 0.75, 1];
+  const LINE_H = 20; // px between tooltip value lines
 
   let hovered = null;
 
@@ -51,14 +51,15 @@
     ).join(' ')
   );
 
-  $: tipAxis = hovered !== null ? axes[hovered] : null;
-  $: tipVal1 = tipAxis ? p1[tipAxis.key] : null;
-  $: tipVal2 = tipAxis ? p2[tipAxis.key] : null;
-  $: tipAvg = hovered !== null ? +(avgVals[hovered] ?? 0).toFixed(1) : null;
-  $: tipUnit = tipAxis?.unit ?? '';
-  $: tipPos = hovered !== null
-    ? { x: CX + Math.cos(angles[hovered]) * TIP_DIST, y: CY + Math.sin(angles[hovered]) * TIP_DIST }
-    : null;
+  // text-anchor based on cosine of angle
+  function anchor(a) {
+    const c = Math.cos(a);
+    return c > 0.3 ? 'start' : c < -0.3 ? 'end' : 'middle';
+  }
+  // vertical direction for tooltip value stacking (1 = down, -1 = up)
+  function valDir(a) {
+    return Math.sin(a) >= 0 ? 1 : -1;
+  }
 </script>
 
 {#if N >= 3}
@@ -135,11 +136,14 @@
     />
   {/each}
 
-  <!-- Labels + hover areas -->
+  <!-- Labels + inline hover values -->
   {#each axes as ax, i}
-    {@const lx = CX + Math.cos(angles[i]) * LABEL_DIST}
-    {@const ly = CY + Math.sin(angles[i]) * LABEL_DIST}
+    {@const a = angles[i]}
+    {@const lx = CX + Math.cos(a) * LABEL_DIST}
+    {@const ly = CY + Math.sin(a) * LABEL_DIST}
     {@const isH = hovered === i}
+    {@const anch = anchor(a)}
+    {@const dir = valDir(a)}
     <g
       on:mouseenter={() => (hovered = i)}
       on:mouseleave={() => (hovered = null)}
@@ -147,7 +151,9 @@
       role="img"
       aria-label={ax.short ?? ax.label}
     >
-      <rect x={lx - 46} y={ly - 15} width={92} height={30} fill="transparent" />
+      <!-- hit area -->
+      <rect x={lx - 48} y={ly - 16} width={96} height={32} fill="transparent" />
+      <!-- axis label -->
       <text
         x={lx}
         y={ly}
@@ -158,40 +164,42 @@
         font-weight={isH ? 800 : 600}
         fill={isH ? 'var(--accent)' : 'var(--muted)'}
       >{ax.short ?? ax.label}</text>
+
+      <!-- inline values on hover, stacked outward from chart -->
+      {#if isH}
+        {@const val1 = p1[ax.key]}
+        {@const val2 = p2[ax.key]}
+        {@const avgV = avgVals[i]}
+        <text
+          x={lx} y={ly + dir * LINE_H}
+          text-anchor={anch}
+          dominant-baseline="middle"
+          font-family="'Barlow Condensed', sans-serif"
+          font-size="13"
+          font-weight="700"
+          fill={c1}
+        >{val1 != null ? `${val1}${ax.unit}` : '—'}</text>
+        <text
+          x={lx} y={ly + dir * LINE_H * 2}
+          text-anchor={anch}
+          dominant-baseline="middle"
+          font-family="'Barlow Condensed', sans-serif"
+          font-size="13"
+          font-weight="700"
+          fill={c2}
+        >{val2 != null ? `${val2}${ax.unit}` : '—'}</text>
+        <text
+          x={lx} y={ly + dir * LINE_H * 3}
+          text-anchor={anch}
+          dominant-baseline="middle"
+          font-family="'Barlow Condensed', sans-serif"
+          font-size="11"
+          font-weight="600"
+          fill="var(--avg)"
+        >⌀ {avgV != null ? (+avgV).toFixed(1) + ax.unit : '—'}</text>
+      {/if}
     </g>
   {/each}
-
-  <!-- Tooltip card -->
-  {#if hovered !== null && tipPos && tipAxis}
-    {@const TW = 100}
-    {@const TH = 68}
-    {@const tx = tipPos.x}
-    {@const ty = tipPos.y}
-    <rect
-      x={tx - TW / 2} y={ty - TH / 2}
-      width={TW} height={TH}
-      rx="6" fill="white" stroke="var(--bord)" stroke-width="1.5"
-      filter="url(#tip-shadow)"
-    />
-    <text x={tx} y={ty - TH / 2 + 16} text-anchor="middle"
-      font-family="'Barlow Condensed', sans-serif" font-size="13" fill={c1} font-weight="700">
-      {tipVal1 != null ? `${tipVal1}${tipUnit}` : '—'}
-    </text>
-    <text x={tx} y={ty - TH / 2 + 33} text-anchor="middle"
-      font-family="'Barlow Condensed', sans-serif" font-size="13" fill={c2} font-weight="700">
-      {tipVal2 != null ? `${tipVal2}${tipUnit}` : '—'}
-    </text>
-    <text x={tx} y={ty - TH / 2 + 50} text-anchor="middle"
-      font-family="'Barlow Condensed', sans-serif" font-size="11" fill="var(--avg)" font-weight="600">
-      ⌀ {tipAvg}{tipUnit}
-    </text>
-  {/if}
-
-  <defs>
-    <filter id="tip-shadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="2" stdDeviation="6" flood-color="rgba(0,0,0,0.1)" />
-    </filter>
-  </defs>
 </svg>
 {:else}
 <div class="no-radar">
