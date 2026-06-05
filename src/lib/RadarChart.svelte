@@ -148,23 +148,23 @@
         fill={isH ? 'var(--accent)' : 'var(--muted)'}
       >{ax.short ?? ax.label}</text>
 
-      <!-- inline values on hover, stacked outward from chart -->
+      <!-- inline values on hover, centered on label, stacked outward from chart -->
       {#if isH}
         {@const val1 = p1[ax.key]}
         {@const val2 = p2[ax.key]}
         {@const avgV = avgVals[i]}
         <text x={lx} y={ly + dir * LINE_H}
-          text-anchor={anch} dominant-baseline="middle"
+          text-anchor="middle" dominant-baseline="middle"
           font-family="'Barlow Condensed', sans-serif"
           font-size={fsLabel + 2} font-weight="700" fill={c1}
         >{val1 != null ? `${val1}${ax.unit}` : '—'}</text>
         <text x={lx} y={ly + dir * LINE_H * 2}
-          text-anchor={anch} dominant-baseline="middle"
+          text-anchor="middle" dominant-baseline="middle"
           font-family="'Barlow Condensed', sans-serif"
           font-size={fsLabel + 2} font-weight="700" fill={c2}
         >{val2 != null ? `${val2}${ax.unit}` : '—'}</text>
         <text x={lx} y={ly + dir * LINE_H * 3}
-          text-anchor={anch} dominant-baseline="middle"
+          text-anchor="middle" dominant-baseline="middle"
           font-family="'Barlow Condensed', sans-serif"
           font-size={fsLabel} font-weight="600" fill="var(--avg)"
         >⌀ {avgV != null ? (+avgV).toFixed(1) + ax.unit : '—'}</text>

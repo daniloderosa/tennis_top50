@@ -30,13 +30,13 @@
   let showDebug   = true;
   let padH        = 0;
   let maxW        = 1660;
-  let fsBarLabel  = 15;
-  let fsBarValue  = 22;
+  let fsBarLabel  = 17;
+  let fsBarValue  = 28;
   let fsPlayer    = 27;
   let fsTabs      = 18;
-  let fsRadar     = 11;   // SVG user-unit font size for radar labels
-  let colW        = 240;  // px width of each stats column
-  let radarSize   = 420;  // px rendered size of radar SVG
+  let fsRadar     = 15;   // SVG user-unit font size for radar labels
+  let colW        = 330;  // px width of each stats column
+  let radarSize   = 510;  // px rendered size of radar SVG
 
   $: cssVars = [
     `--pad-h:${padH}px`,
@@ -108,13 +108,15 @@
           size={radarSize}
           fsLabel={fsRadar}
         />
-        <div class="radar-legend">
-          <svg width="22" height="6">
-            <line x1="0" y1="3" x2="22" y2="3" stroke="var(--avg)" stroke-width="2" stroke-dasharray="4 3" />
-          </svg>
-          <span class="legend-label">Media Top 50</span>
+        <div class="radar-footer">
+          <div class="radar-legend">
+            <svg width="22" height="6">
+              <line x1="0" y1="3" x2="22" y2="3" stroke="var(--avg)" stroke-width="2" stroke-dasharray="4 3" />
+            </svg>
+            <span class="legend-label">Media Top 50</span>
+          </div>
+          <span class="radar-hint">Passa il mouse sulle etichette per i valori</span>
         </div>
-        <span class="radar-hint">Passa il mouse sulle etichette per i valori</span>
       </div>
 
       <div class="col-stats card">
@@ -407,30 +409,39 @@
     align-items: center;
     justify-content: center;
     padding: 24px 12px 16px;
-    gap: 10px;
+    position: relative;
   }
 
   .radar-col { min-height: 480px; }
+
+  .radar-footer {
+    position: absolute;
+    bottom: 14px;
+    right: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+  }
 
   .radar-legend {
     display: flex;
     align-items: center;
     gap: 7px;
-    margin-top: 4px;
   }
 
   .legend-label {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: var(--fs-bar-label, 15px);
+    font-size: 12px;
     color: var(--muted);
     font-weight: 600;
   }
 
   .radar-hint {
     font-family: 'Barlow', sans-serif;
-    font-size: 12px;
+    font-size: 11px;
     color: var(--muted);
-    text-align: center;
+    text-align: right;
   }
 
   /* ── FOOTER ── */
