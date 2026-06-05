@@ -97,6 +97,7 @@
     border-radius: 10px;
     padding: 12px 14px;
     border: 1.5px solid;
+    position: relative;
   }
 
   .trigger {

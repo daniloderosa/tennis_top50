@@ -7,15 +7,18 @@
   export let c2;
   export let axes = [];
   export let avgVals = [];
+  export let size = 420;    // rendered px width/height (viewBox stays 0 0 420 420)
+  export let fsLabel = 11;  // font size for axis labels (in SVG user units)
 
-  const SIZE = 420;
-  const CX = SIZE / 2;
-  const CY = SIZE / 2;
-  const R = 148;
+  // Internal coordinate system is always 420×420
+  const SZ  = 420;
+  const CX  = SZ / 2;
+  const CY  = SZ / 2;
+  const R   = 148;
   const LABEL_DIST = R + 52;
+  const LINE_H = 20;
 
   const rings = [0.25, 0.5, 0.75, 1];
-  const LINE_H = 20; // px between tooltip value lines
 
   let hovered = null;
 
@@ -28,8 +31,8 @@
     return ax.flip ? 1 - n : n;
   }
 
-  $: v1 = axes.map(ax => normV(p1[ax.key], ax));
-  $: v2 = axes.map(ax => normV(p2[ax.key], ax));
+  $: v1   = axes.map(ax => normV(p1[ax.key], ax));
+  $: v2   = axes.map(ax => normV(p2[ax.key], ax));
   $: vAvg = axes.map((ax, i) => normV(avgVals[i] ?? 0, ax));
 
   function makePath(vs, angs) {
@@ -41,8 +44,8 @@
     }).join('') + 'Z';
   }
 
-  $: path1 = makePath(v1, angles);
-  $: path2 = makePath(v2, angles);
+  $: path1   = makePath(v1, angles);
+  $: path2   = makePath(v2, angles);
   $: pathAvg = makePath(vAvg, angles);
 
   $: ringPolys = rings.map(rv =>
@@ -51,12 +54,10 @@
     ).join(' ')
   );
 
-  // text-anchor based on cosine of angle
   function anchor(a) {
     const c = Math.cos(a);
     return c > 0.3 ? 'start' : c < -0.3 ? 'end' : 'middle';
   }
-  // vertical direction for tooltip value stacking (1 = down, -1 = up)
   function valDir(a) {
     return Math.sin(a) >= 0 ? 1 : -1;
   }
@@ -64,8 +65,9 @@
 
 {#if N >= 3}
 <svg
-  width={SIZE}
-  height={SIZE}
+  viewBox="0 0 {SZ} {SZ}"
+  width={size}
+  height={size}
   style="overflow: visible; display: block; margin: 0 auto;"
 >
   <!-- Grid rings -->
@@ -89,34 +91,16 @@
   {/each}
 
   <!-- Avg line -->
-  <path
-    d={pathAvg}
-    fill="none"
-    stroke="var(--avg)"
-    stroke-width="1.8"
-    stroke-dasharray="4 3"
-    stroke-linejoin="round"
-  />
+  <path d={pathAvg} fill="none" stroke="var(--avg)" stroke-width="1.8"
+    stroke-dasharray="4 3" stroke-linejoin="round" />
 
   <!-- P2 polygon -->
-  <path
-    d={path2}
-    fill={c2}
-    fill-opacity="0.08"
-    stroke={c2}
-    stroke-width="2.5"
-    stroke-linejoin="round"
-  />
+  <path d={path2} fill={c2} fill-opacity="0.08" stroke={c2}
+    stroke-width="2.5" stroke-linejoin="round" />
 
   <!-- P1 polygon -->
-  <path
-    d={path1}
-    fill={c1}
-    fill-opacity="0.08"
-    stroke={c1}
-    stroke-width="2.5"
-    stroke-linejoin="round"
-  />
+  <path d={path1} fill={c1} fill-opacity="0.08" stroke={c1}
+    stroke-width="2.5" stroke-linejoin="round" />
 
   <!-- P1 dots -->
   {#each v1 as v, i}
@@ -138,12 +122,12 @@
 
   <!-- Labels + inline hover values -->
   {#each axes as ax, i}
-    {@const a = angles[i]}
-    {@const lx = CX + Math.cos(a) * LABEL_DIST}
-    {@const ly = CY + Math.sin(a) * LABEL_DIST}
-    {@const isH = hovered === i}
+    {@const a    = angles[i]}
+    {@const lx   = CX + Math.cos(a) * LABEL_DIST}
+    {@const ly   = CY + Math.sin(a) * LABEL_DIST}
+    {@const isH  = hovered === i}
     {@const anch = anchor(a)}
-    {@const dir = valDir(a)}
+    {@const dir  = valDir(a)}
     <g
       on:mouseenter={() => (hovered = i)}
       on:mouseleave={() => (hovered = null)}
@@ -155,12 +139,11 @@
       <rect x={lx - 48} y={ly - 16} width={96} height={32} fill="transparent" />
       <!-- axis label -->
       <text
-        x={lx}
-        y={ly}
+        x={lx} y={ly}
         text-anchor="middle"
         dominant-baseline="middle"
         font-family="'Barlow Condensed', sans-serif"
-        font-size={isH ? 13 : 11}
+        font-size={isH ? fsLabel + 2 : fsLabel}
         font-weight={isH ? 800 : 600}
         fill={isH ? 'var(--accent)' : 'var(--muted)'}
       >{ax.short ?? ax.label}</text>
@@ -170,32 +153,20 @@
         {@const val1 = p1[ax.key]}
         {@const val2 = p2[ax.key]}
         {@const avgV = avgVals[i]}
-        <text
-          x={lx} y={ly + dir * LINE_H}
-          text-anchor={anch}
-          dominant-baseline="middle"
+        <text x={lx} y={ly + dir * LINE_H}
+          text-anchor={anch} dominant-baseline="middle"
           font-family="'Barlow Condensed', sans-serif"
-          font-size="13"
-          font-weight="700"
-          fill={c1}
+          font-size={fsLabel + 2} font-weight="700" fill={c1}
         >{val1 != null ? `${val1}${ax.unit}` : '—'}</text>
-        <text
-          x={lx} y={ly + dir * LINE_H * 2}
-          text-anchor={anch}
-          dominant-baseline="middle"
+        <text x={lx} y={ly + dir * LINE_H * 2}
+          text-anchor={anch} dominant-baseline="middle"
           font-family="'Barlow Condensed', sans-serif"
-          font-size="13"
-          font-weight="700"
-          fill={c2}
+          font-size={fsLabel + 2} font-weight="700" fill={c2}
         >{val2 != null ? `${val2}${ax.unit}` : '—'}</text>
-        <text
-          x={lx} y={ly + dir * LINE_H * 3}
-          text-anchor={anch}
-          dominant-baseline="middle"
+        <text x={lx} y={ly + dir * LINE_H * 3}
+          text-anchor={anch} dominant-baseline="middle"
           font-family="'Barlow Condensed', sans-serif"
-          font-size="11"
-          font-weight="600"
-          fill="var(--avg)"
+          font-size={fsLabel} font-weight="600" fill="var(--avg)"
         >⌀ {avgV != null ? (+avgV).toFixed(1) + ax.unit : '—'}</text>
       {/if}
     </g>

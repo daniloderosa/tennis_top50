@@ -4,8 +4,8 @@
   import StatBars from './lib/StatBars.svelte';
   import PlayerSelector from './lib/PlayerSelector.svelte';
 
-  const C1 = '#2563eb';
-  const C2 = '#d97706';
+  const C1    = '#2563eb';
+  const C2    = '#d97706';
   const ACCENT = '#2d7a45';
 
   let p1rank = +(localStorage.getItem('atpb50_p1') || 1);
@@ -26,14 +26,17 @@
   function selectP1(e) { p1rank = e.detail; }
   function selectP2(e) { p2rank = e.detail; }
 
-  // ── Debug panel ────────────────────────────────────────────────
-  let showDebug = true;
-  let padH      = 12;   // px, horizontal padding of main
-  let maxW      = 1340; // px, max-width of main
-  let fsBarLabel = 13;  // px, stat bar label font size
-  let fsBarValue = 20;  // px, stat bar value font size
-  let fsPlayer   = 22;  // px, player name font size
-  let fsTabs     = 14;  // px, tab button font size
+  // ── Debug panel ──────────────────────────────────────────────
+  let showDebug   = true;
+  let padH        = 0;
+  let maxW        = 1660;
+  let fsBarLabel  = 15;
+  let fsBarValue  = 22;
+  let fsPlayer    = 27;
+  let fsTabs      = 18;
+  let fsRadar     = 11;   // SVG user-unit font size for radar labels
+  let colW        = 240;  // px width of each stats column
+  let radarSize   = 420;  // px rendered size of radar SVG
 
   $: cssVars = [
     `--pad-h:${padH}px`,
@@ -42,6 +45,7 @@
     `--fs-bar-value:${fsBarValue}px`,
     `--fs-player:${fsPlayer}px`,
     `--fs-tabs:${fsTabs}px`,
+    `--col-w:${colW}px`,
   ].join(';');
 </script>
 
@@ -56,7 +60,7 @@
   </header>
 
   <main>
-    <!-- ROW 1: selettori + H2H placeholder -->
+    <!-- ROW 1: selettori + H2H -->
     <div class="row row-selectors">
       <PlayerSelector player={p1} color={C1} otherRank={p2rank} on:select={selectP1} />
 
@@ -77,7 +81,7 @@
       <PlayerSelector player={p2} color={C2} otherRank={p1rank} on:select={selectP2} />
     </div>
 
-    <!-- ROW 2: tab selezione sezione -->
+    <!-- ROW 2: tab -->
     <div class="row row-tabs">
       <div class="tabs">
         {#each TAB_KEYS as t (t)}
@@ -86,9 +90,7 @@
             class:active={tab === t}
             style={tab === t ? `background: ${ACCENT}; color: #fff;` : ''}
             on:click={() => (tab = t)}
-          >
-            {t}
-          </button>
+          >{t}</button>
         {/each}
       </div>
     </div>
@@ -100,7 +102,12 @@
       </div>
 
       <div class="col-radar card radar-col">
-        <RadarChart {p1} {p2} c1={C1} c2={C2} axes={radarData.axes} avgVals={radarData.avg} />
+        <RadarChart
+          {p1} {p2} c1={C1} c2={C2}
+          axes={radarData.axes} avgVals={radarData.avg}
+          size={radarSize}
+          fsLabel={fsRadar}
+        />
         <div class="radar-legend">
           <svg width="22" height="6">
             <line x1="0" y1="3" x2="22" y2="3" stroke="var(--avg)" stroke-width="2" stroke-dasharray="4 3" />
@@ -122,12 +129,11 @@
       <div class="footer-title" style="color: {ACCENT}">FONTE E METODOLOGIA</div>
       <p class="footer-text">
         Dati basati su statistiche ATP Top 50 tratte da <strong>Tennis Abstract</strong>
-        (tennisabstract.com, Jeff Sackmann). I valori sono aggiornati all'ultima esecuzione di <code>npm run fetch-data</code>.
+        (tennisabstract.com, Jeff Sackmann). Aggiornati all'ultima esecuzione di <code>npm run fetch-data</code>.
       </p>
       <p class="footer-text">
-        <strong>Radar:</strong> ogni asse è normalizzato sul range min–max del top 50,
-        evidenziando la posizione relativa tra pari. Le stat con <em>flip</em> (es. Doppi Falli)
-        sono invertite: raggio più lungo = prestazione migliore.
+        <strong>Radar:</strong> ogni asse è normalizzato sul range min–max del top 50.
+        Le stat con flip (es. Doppi Falli) sono invertite: raggio più lungo = prestazione migliore.
         <strong>H2H:</strong> dati non ancora disponibili.
       </p>
     </div>
@@ -140,34 +146,64 @@
       <span>⚙ Debug layout</span>
       <button class="debug-close" on:click={() => (showDebug = false)}>×</button>
     </div>
-    <div class="debug-row">
-      <label>Margine H <strong>{padH}px</strong></label>
-      <input type="range" min="0" max="80" step="2" bind:value={padH} />
+
+    <div class="debug-group">
+      <div class="debug-group-title">Layout</div>
+      <div class="debug-row">
+        <label>Margine H <strong>{padH}px</strong></label>
+        <input type="range" min="0" max="80" step="2" bind:value={padH} />
+      </div>
+      <div class="debug-row">
+        <label>Max width <strong>{maxW}px</strong></label>
+        <input type="range" min="800" max="1800" step="20" bind:value={maxW} />
+      </div>
+      <div class="debug-row">
+        <label>Largh. colonne stat <strong>{colW}px</strong></label>
+        <input type="range" min="160" max="480" step="10" bind:value={colW} />
+      </div>
     </div>
-    <div class="debug-row">
-      <label>Max width <strong>{maxW}px</strong></label>
-      <input type="range" min="800" max="1800" step="20" bind:value={maxW} />
+
+    <div class="debug-group">
+      <div class="debug-group-title">Font barre</div>
+      <div class="debug-row">
+        <label>Etichetta stat <strong>{fsBarLabel}px</strong></label>
+        <input type="range" min="9" max="20" bind:value={fsBarLabel} />
+      </div>
+      <div class="debug-row">
+        <label>Valore stat <strong>{fsBarValue}px</strong></label>
+        <input type="range" min="12" max="34" bind:value={fsBarValue} />
+      </div>
     </div>
-    <div class="debug-row">
-      <label>Etichetta stat <strong>{fsBarLabel}px</strong></label>
-      <input type="range" min="9" max="18" bind:value={fsBarLabel} />
+
+    <div class="debug-group">
+      <div class="debug-group-title">Font selettori / tab</div>
+      <div class="debug-row">
+        <label>Nome giocatore <strong>{fsPlayer}px</strong></label>
+        <input type="range" min="14" max="36" bind:value={fsPlayer} />
+      </div>
+      <div class="debug-row">
+        <label>Tab <strong>{fsTabs}px</strong></label>
+        <input type="range" min="10" max="24" bind:value={fsTabs} />
+      </div>
     </div>
-    <div class="debug-row">
-      <label>Valore stat <strong>{fsBarValue}px</strong></label>
-      <input type="range" min="12" max="32" bind:value={fsBarValue} />
+
+    <div class="debug-group">
+      <div class="debug-group-title">Radar</div>
+      <div class="debug-row">
+        <label>Dimensione <strong>{radarSize}px</strong></label>
+        <input type="range" min="260" max="600" step="10" bind:value={radarSize} />
+      </div>
+      <div class="debug-row">
+        <label>Font etichette <strong>{fsRadar}</strong></label>
+        <input type="range" min="7" max="18" bind:value={fsRadar} />
+      </div>
     </div>
-    <div class="debug-row">
-      <label>Nome giocatore <strong>{fsPlayer}px</strong></label>
-      <input type="range" min="14" max="34" bind:value={fsPlayer} />
-    </div>
-    <div class="debug-row">
-      <label>Font tab <strong>{fsTabs}px</strong></label>
-      <input type="range" min="10" max="22" bind:value={fsTabs} />
-    </div>
+
     <div class="debug-values">
-      padH={padH} · maxW={maxW}<br/>
+      padH={padH} · maxW={maxW} · colW={colW}<br/>
       fsBarLabel={fsBarLabel} · fsBarValue={fsBarValue}<br/>
-      fsPlayer={fsPlayer} · fsTabs={fsTabs}
+      fsPlayer={fsPlayer} · fsTabs={fsTabs}<br/>
+      radarSize={radarSize} · fsRadar={fsRadar}
     </div>
   </div>
   {:else}
@@ -176,22 +212,18 @@
 </div>
 
 <style>
-  :global(*) {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
+  :global(*) { box-sizing: border-box; margin: 0; padding: 0; }
 
   :global(:root) {
-    --bg: #f4f7f5;
-    --surf: #ffffff;
+    --bg:    #f4f7f5;
+    --surf:  #ffffff;
     --surf2: #edf3ef;
-    --bord: #ccddd4;
-    --accent: #2d7a45;
-    --p1: #2563eb;
-    --p2: #d97706;
-    --avg: #9aada0;
-    --txt: #1a2e20;
+    --bord:  #ccddd4;
+    --accent:#2d7a45;
+    --p1:    #2563eb;
+    --p2:    #d97706;
+    --avg:   #9aada0;
+    --txt:   #1a2e20;
     --muted: #7a9882;
   }
 
@@ -205,16 +237,8 @@
 
   :global(::-webkit-scrollbar) { width: 5px; background: var(--surf2); }
   :global(::-webkit-scrollbar-thumb) { background: var(--bord); border-radius: 3px; }
-
-  :global(button) {
-    cursor: pointer;
-    border: none;
-    background: transparent;
-    color: inherit;
-    font-family: inherit;
-  }
-
-  :global(input) { font-family: inherit; }
+  :global(button) { cursor: pointer; border: none; background: transparent; color: inherit; font-family: inherit; }
+  :global(input)  { font-family: inherit; }
 
   .app {
     min-height: 100vh;
@@ -256,29 +280,24 @@
   /* ── MAIN ── */
   main {
     flex: 1;
-    max-width: var(--max-w, 1340px);
+    max-width: var(--max-w, 1660px);
     width: 100%;
     margin: 0 auto;
-    padding: 12px var(--pad-h, 12px);
+    padding: 12px var(--pad-h, 0px);
     display: flex;
     flex-direction: column;
     gap: 10px;
     min-height: 0;
   }
 
-  .row {
-    display: grid;
-    gap: 10px;
-  }
+  .row { display: grid; gap: 10px; }
 
-  /* Row 1: selectors + H2H */
   .row-selectors {
     grid-template-columns: 1fr 320px 1fr;
     align-items: stretch;
     flex-shrink: 0;
   }
 
-  /* H2H box */
   .h2h-box {
     background: var(--surf);
     border-radius: 10px;
@@ -299,11 +318,7 @@
     text-transform: uppercase;
   }
 
-  .h2h-scores {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+  .h2h-scores { display: flex; align-items: center; gap: 10px; }
 
   .h2h-name {
     font-family: 'Barlow Condensed', sans-serif;
@@ -311,11 +326,7 @@
     font-weight: 700;
   }
 
-  .h2h-numbers {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
+  .h2h-numbers { display: flex; align-items: center; gap: 6px; }
 
   .h2h-num {
     font-family: 'Barlow Condensed', sans-serif;
@@ -337,7 +348,6 @@
     font-style: italic;
   }
 
-  /* Row 2: tabs */
   .row-tabs {
     grid-template-columns: 1fr;
     flex-shrink: 0;
@@ -355,7 +365,7 @@
 
   .tab-btn {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: var(--fs-tabs, 14px);
+    font-size: var(--fs-tabs, 18px);
     font-weight: 700;
     letter-spacing: 0.05em;
     padding: 7px 28px;
@@ -369,9 +379,9 @@
     color: var(--txt);
   }
 
-  /* Row 3: stats + radar — fills remaining vertical space */
+  /* Row 3: fills remaining height */
   .row-main {
-    grid-template-columns: 240px 1fr 240px;
+    grid-template-columns: var(--col-w, 240px) 1fr var(--col-w, 240px);
     align-items: stretch;
     flex: 1;
     min-height: 0;
@@ -400,9 +410,7 @@
     gap: 10px;
   }
 
-  .radar-col {
-    min-height: 480px;
-  }
+  .radar-col { min-height: 480px; }
 
   .radar-legend {
     display: flex;
@@ -413,14 +421,14 @@
 
   .legend-label {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
+    font-size: var(--fs-bar-label, 15px);
     color: var(--muted);
     font-weight: 600;
   }
 
   .radar-hint {
     font-family: 'Barlow', sans-serif;
-    font-size: 11px;
+    font-size: 12px;
     color: var(--muted);
     text-align: center;
   }
@@ -478,8 +486,10 @@
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.13);
     display: flex;
     flex-direction: column;
-    gap: 8px;
-    min-width: 230px;
+    gap: 6px;
+    min-width: 240px;
+    max-height: 90vh;
+    overflow-y: auto;
     font-family: 'Barlow', sans-serif;
   }
 
@@ -490,20 +500,28 @@
     font-size: 13px;
     font-weight: 700;
     color: var(--txt);
+    margin-bottom: 2px;
   }
 
-  .debug-close {
-    font-size: 18px;
-    color: var(--muted);
-    line-height: 1;
-    padding: 0 2px;
-  }
+  .debug-close { font-size: 18px; color: var(--muted); line-height: 1; padding: 0 2px; }
 
-  .debug-row {
+  .debug-group {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 5px;
+    border-top: 1px solid var(--surf2);
+    padding-top: 6px;
   }
+
+  .debug-group-title {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .debug-row { display: flex; flex-direction: column; gap: 1px; }
 
   .debug-row label {
     display: flex;
@@ -511,6 +529,8 @@
     font-size: 11px;
     color: var(--muted);
   }
+
+  .debug-row label strong { color: var(--txt); }
 
   .debug-row input[type="range"] {
     width: 100%;
@@ -524,9 +544,10 @@
     background: var(--surf2);
     border-radius: 5px;
     padding: 6px 8px;
-    line-height: 1.7;
+    line-height: 1.8;
     font-family: monospace;
     user-select: all;
+    margin-top: 2px;
   }
 
   .debug-toggle {
