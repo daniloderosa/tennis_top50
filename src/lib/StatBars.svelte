@@ -44,7 +44,9 @@
   .stats-panel {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    /* margini auto (non justify-content): centra verticalmente nella
+       colonna ma degrada bene se il contenuto sborda (overflow-y) */
+    margin: auto 0;
   }
 
   .stat-row {

@@ -129,8 +129,11 @@
   <!-- Labels + inline hover values -->
   {#each axes as ax, i}
     {@const a    = angles[i]}
-    {@const lx   = CX + Math.cos(a) * LABEL_DIST}
-    {@const ly   = CY + Math.sin(a) * LABEL_DIST}
+    <!-- solo "PB concesse/match" (bpvs_m) sta più distante: il suo label
+         lungo toccava il poligono esterno -->
+    {@const ld   = LABEL_DIST + (ax.key === 'bpvs_m' ? 14 : 0)}
+    {@const lx   = CX + Math.cos(a) * ld}
+    {@const ly   = CY + Math.sin(a) * ld}
     {@const isH  = hovered === i}
     {@const anch = anchor(a)}
     {@const dir  = valDir(a)}
@@ -148,7 +151,6 @@
         x={lx} y={ly}
         text-anchor="middle"
         dominant-baseline="middle"
-        font-family="'Spectral', serif"
         font-size={isH ? fsLabel + 1 : fsLabel}
         font-weight={isH ? 600 : 500}
         fill={isH ? 'var(--ink)' : 'var(--muted)'}
@@ -165,13 +167,11 @@
         {#each lines as ln, j}
           <text x={lx} y={ly + dir * LINE_H * (j + 1)}
             text-anchor="middle" dominant-baseline="middle"
-            font-family="'Spectral', serif"
-            font-size={fsLabel + 1} font-weight="700" fill={ln.color}
+              font-size={fsLabel + 1} font-weight="700" fill={ln.color}
           >{ln.val != null ? `${ln.val}${ax.unit}` : '—'}</text>
         {/each}
         <text x={lx} y={ly + dir * LINE_H * (lines.length + 1)}
           text-anchor="middle" dominant-baseline="middle"
-          font-family="'Spectral', serif"
           font-size={fsLabel} font-weight="500" fill="var(--avg)"
         >⌀ {avgV != null ? (+avgV).toFixed(1) + ax.unit : '—'}</text>
       {/if}
@@ -185,6 +185,8 @@
 {/if}
 
 <style>
+  svg text { font-family: var(--serif); }
+
   .no-radar {
     display: flex;
     align-items: center;

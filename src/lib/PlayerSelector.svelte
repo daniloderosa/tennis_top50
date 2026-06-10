@@ -113,6 +113,7 @@
     font-size: 13px;
     font-weight: 600;
     letter-spacing: 0.04em;
+    line-height: 1.1;
   }
 
   .player-line {
@@ -142,7 +143,7 @@
 
   .arrow {
     color: var(--muted);
-    font-size: 14px;
+    font-size: 18px;
     transition: transform 0.2s;
     display: inline-block;
   }

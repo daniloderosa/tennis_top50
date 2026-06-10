@@ -183,6 +183,11 @@
 <style>
   :global(*) { box-sizing: border-box; margin: 0; padding: 0; }
 
+  /* ── TEMA ──
+     Colori: sfondo = --bg/--surf qui sotto; colori giocatori = costanti
+     C1 (P1 blu) e C2 (P2 ocra) in cima al <script> di questo file.
+     Font: --serif (display/valori) e --serif-text (testo/corsivi) qui sotto
+     + il <link> Google Fonts in index.html. */
   :global(:root) {
     --bg:    #f4efe6;       /* carta calda */
     --surf:  #f4efe6;
@@ -191,8 +196,6 @@
     --rule:  #ddd5c6;
     --ink:   #1c1a17;
     --accent:#1c1a17;
-    --p1:    #2f5d8a;
-    --p2:    #b8722c;
     --avg:   #9a8f7a;
     --txt:   #1c1a17;
     --muted: #8a8170;
@@ -224,6 +227,12 @@
     font-size: 16px;
   }
 
+  :global(html) {
+    /* scrollbar sempre presente: la sua comparsa nei tab con più righe
+       non sposta il centro del radar */
+    overflow-y: scroll;
+  }
+
   :global(::-webkit-scrollbar) { width: 5px; background: var(--surf2); }
   :global(::-webkit-scrollbar-thumb) { background: var(--rule); border-radius: 3px; }
   :global(button) { cursor: pointer; border: none; background: transparent; color: inherit; font-family: inherit; }
@@ -244,12 +253,14 @@
     padding: 26px 36px 20px;
     display: flex;
     flex-direction: column;
-    gap: 11px;
+    gap: 8px;
     min-height: 0;
   }
 
+  /* Sotto i 1500px i margini laterali AUMENTANO (60px): su 13" il layout
+     full-width risultava schiacciato ai bordi — richiesta dell'utente */
   @media (max-width: 1500px) {
-    main { padding: 18px 28px 14px; gap: 9px; }
+    main { padding: 18px 60px 14px; gap: 7px; }
   }
 
   /* ── MASTHEAD ── */
@@ -350,12 +361,19 @@
 
   .row { display: grid; gap: 10px; }
 
+  /* margin-top calibrato perché il blocco nome (eyebrow+nome) risulti al
+     centro verticale della fascia tra il filetto nero (masthead) e la
+     linea grigia dei tab: spazio sopra ≈ spazio sotto + altezza tab */
   .row-selectors {
     grid-template-columns: 1fr 1fr;
     align-items: center;
     gap: 24px;
-    margin-top: 4px;
+    margin-top: 32px;
     flex-shrink: 0;
+  }
+
+  @media (max-width: 1500px) {
+    .row-selectors { margin-top: 27px; }
   }
 
   .row-tabs {
@@ -374,23 +392,21 @@
     font-family: var(--serif);
     font-size: var(--fs-tabs, 19px);
     font-weight: 400;
-    font-style: italic;
     color: var(--muted2);
-    padding: 5px 34px 6px;
+    padding: 3px 34px 5px;
     border-bottom: 2px solid transparent;
     margin-bottom: -1px;
     transition: color 0.15s;
   }
 
   @media (max-width: 1500px) {
-    .tab-btn { padding: 4px 26px 5px; }
+    .tab-btn { padding: 2px 26px 4px; }
   }
 
   .tab-btn:not(.active):hover { color: var(--txt); }
 
   .tab-btn.active {
     font-weight: 600;
-    font-style: normal;
     color: var(--ink);
     border-bottom-color: var(--ink);
   }
@@ -414,9 +430,11 @@
     overflow-y: auto;
   }
 
-  /* Il radar (margin auto) si centra nello spazio libero; la legenda resta
-     in fondo. min-height garantisce che i valori hover dell'asse in basso
-     (che sbordano dal box SVG) non tocchino la legenda. */
+  /* Il radar (margin: auto sull'SVG) si centra verticalmente nella fascia
+     sotto la linea grigia dei tab; la legenda resta in fondo. Il min-height
+     garantisce che i valori hover dell'asse in basso (che sbordano dal box
+     SVG) non tocchino la legenda. Il centro coincide nei 4 tab finché le
+     colonne stat stanno nell'altezza della finestra. */
   .col-radar {
     display: flex;
     flex-direction: column;
@@ -426,7 +444,7 @@
   }
 
   @media (max-width: 1500px) {
-    .col-radar { min-height: 590px; }
+    .col-radar { min-height: 600px; }
     .col-radar :global(.radar-svg) { width: 430px; height: 430px; }
   }
 

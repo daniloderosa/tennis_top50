@@ -46,21 +46,26 @@ Mapping colonne particolari: `MdOppRk`→opp_rnk_med, `MnOppRk`→opp_rnk_avg, `
 
 Stile data-journalism serif su carta calda (mockup: direzione B di "ATP Best 50 - Direzioni").
 
-- max-width main: **1660px**, padding orizzontale 36px (28px sotto i 1500px: l'utente vuole i margini anche su schermi piccoli)
+- max-width main: **1660px**, padding orizzontale 36px (**60px sotto i 1500px**: su 13" l'utente vuole più margine ai lati, non meno)
 - colonne stat: **330px** (grid `330px 1fr 330px`, gap 30px); sotto i **1500px**: 280px, gap 22px
 - **Breakpoint 1500px** (portatili 13"): stessi rapporti, misure ridotte via media query sulle CSS vars (--fs-bar-value 28→23, --fs-player 34→28, --fs-tabs 17→15, --fs-bar-label 16→14) e radar 510→430 (override CSS su `.radar-svg`)
 - Palette: carta `#f4efe6`, inchiostro `#1c1a17`, P1 blu `#2f5d8a`, P2 ocra `#b8722c`, media `#9a8f7a`, hairline `#e6dfd2` (CSS vars in `:root` di App.svelte)
 - Masthead: titolo "ATP Top 50 — Ultime 52 settimane / Last 52 weeks" (niente kicker), filetto 2px inchiostro; a destra **dropdown lingua** con bandierine e poi bottone **Metodologia** (apre modale con backdrop blur — il footer è stato rimosso)
 - Selettori giocatore: nome grande serif con sottolineatura puntinata, eyebrow "N°rank · NAZ" colorata; dropdown su carta con hairline (P2 allineato/specchiato a destra, prop `align`)
 - Righe stat: label Newsreader corsivo, valore Spectral inchiostro, barra 3px su track hairline; colonna P2 specchiata (prop `align` su StatBars)
-- Tab: serif centrati su filetto, attivo = normale 600 + underline inchiostro, inattivi = corsivo
-- radar: `size={510}`, `fsLabel={15}` — viewBox interno fisso 420×420, scala via attributi width/height; tratti sottili (1.6), fill 0.07, dot r=3 bordo carta, label Spectral
+- Tab: serif centrati su filetto, attivo = 600 + underline inchiostro, inattivi = 400 attenuati (mai corsivo)
+- radar: `size={510}`, `fsLabel={15}` — viewBox interno fisso 420×420, scala via attributi width/height; tratti sottili (1.6), fill 0.07, dot r=3 bordo carta; font dei testi SVG via `var(--serif)` (regola CSS nel componente, niente font hardcoded)
+- **Barre e radar centrati verticalmente** nella fascia sotto la linea grigia dei tab: `.stats-panel { margin: auto 0 }` e SVG radar con `margin: auto` (legenda in fondo); min-height su `.col-radar` (700px / 600px small) evita che i valori hover dell'asse in basso tocchino la legenda. Il centro del radar coincide nei 4 tab finché le colonne stat stanno nella finestra. `html { overflow-y: scroll }` resta (la scrollbar custom 5px comparirebbe solo nei tab con più righe spostando tutto di 5px; `scrollbar-gutter` non funziona con le scrollbar webkit custom)
+- Label radar: tutte a distanza standard tranne **bpvs_m** ("PB concesse/match", +14 unità): il suo label lungo toccava il poligono esterno
+- Nome giocatore centrato nella fascia masthead→linea tab: `margin-top` su `.row-selectors` (32px / 27px small) calibrato come spazio sopra ≈ spazio sotto + altezza tab
+- Tab mai in corsivo (nemmeno gli inattivi)
 - Radar hover: i 3 valori (P1, P2, media ⌀) compaiono inline sotto/sopra il label, sempre centrati (`text-anchor="middle"`)
 - Legenda "media dei primi 50" + hint mouse: in fondo alla colonna radar; l'SVG ha `margin: auto` e `.col-radar` un min-height che evita l'accavallamento con i valori hover dell'asse in basso (che sbordano dal box SVG)
 - **H2H rimosso** (niente dati; l'utente deciderà in futuro come reperirli)
 - Ignorati dal mockup (per scelta utente): filtri superficie (Tutte/Cemento/Terra/Erba)
 - **Giocatori: nessuna selezione di default** (barre vuote, radar con sola media top-50). La selezione vive **solo nell'URL** come slug dei nomi (`?p1=jannik-sinner&p2=carlos-alcaraz`, `history.replaceState`) per link bookmarkabili — niente localStorage per i giocatori. Solo il tab è persistito (`atpb50_tab`); la lingua vive nell'URL (`?lang=`)
-- Sezione nomi+tab compatta (main gap 11px / 9px small; trigger selector senza padding); tab 19px (17px small)
+- Sezione nomi+tab compatta (main gap 8px / 7px small; trigger selector senza padding; freccia selector 18px); tab 19px (17px small)
+- **Tema in un punto solo**: sfondo e font = CSS vars in `:root` di App.svelte (`--bg`, `--surf`, `--serif`, `--serif-text`) + link Google Fonts in index.html; colori giocatori = costanti `C1`/`C2` in cima allo `<script>` di App.svelte (le vars `--p1`/`--p2` sono state rimosse perché inutilizzate)
 
 ## Deploy
 
