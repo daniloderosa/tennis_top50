@@ -46,7 +46,7 @@ export const STAT_TABS = {
     { key: 'bkn_m',   label: 'Break subiti per match',         short: 'Broken/match',   unit: '',  flip: true,  en: { label: 'Times broken per match',        short: 'Broken/match' } },
   ],
   Altro: [
-    { key: 'dr',          label: 'Dominance Ratio',              short: 'Dom. Ratio',        unit: '',  flip: false, en: { label: 'Dominance Ratio',          short: 'Dom. Ratio' } },
+    { key: 'dr',          label: 'Dominance Ratio',              short: 'Dom. Ratio',        unit: '',  flip: false, info: '% di punti in risposta vinti diviso % di punti al servizio vinti', en: { label: 'Dominance Ratio',          short: 'Dom. Ratio', info: '% of return points won divided by % of serve points won' } },
     { key: 'tpw',         label: 'Punti vinti %',                short: '% punti totali',    unit: '%', flip: false, en: { label: 'Total points won %',       short: 'Total pts won' } },
     { key: 'tie',         label: 'Tiebreak vinti %',             short: '% TB vinti',        unit: '%', flip: false, en: { label: 'Tiebreaks won %',          short: 'TBs won' } },
     { key: 'setwon',      label: 'Set vinti %',                  short: '% set vinti',       unit: '%', flip: false, en: { label: 'Sets won %',               short: 'Sets won' } },

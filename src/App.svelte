@@ -44,6 +44,7 @@
   $: t = UI[lang];
   $: p1 = p1rank == null ? null : (PLAYERS.find(p => p.rank === p1rank) ?? null);
   $: p2 = p2rank == null ? null : (PLAYERS.find(p => p.rank === p2rank) ?? null);
+  $: landing = !p1 && !p2; // nessuna selezione = schermata di benvenuto
   $: radarData = getTabRadarData(tab, lang);
 
   $: { localStorage.setItem('atpb50_tab', tab); }
@@ -59,6 +60,13 @@
 
   function selectP1(e) { p1rank = e.detail; syncPlayersURL(); }
   function selectP2(e) { p2rank = e.detail; syncPlayersURL(); }
+
+  // click sul titolo → torna alla landing (nessun giocatore selezionato)
+  function goHome() {
+    p1rank = null;
+    p2rank = null;
+    syncPlayersURL();
+  }
 
   function changeLang(l) {
     lang = l;
@@ -83,9 +91,13 @@
 
 <div class="app">
   <main>
-    <!-- MASTHEAD -->
-    <header class="masthead">
-      <div class="masthead-title">{t.title}</div>
+    <!-- MASTHEAD (in landing: niente titolo, metodologia né filetto) -->
+    <header class="masthead" class:bare={landing}>
+      {#if !landing}
+        <div class="masthead-title">
+          <button class="title-link" on:click={goHome}>{t.titleMain}</button><span class="masthead-title-sub">{t.titleSub}</span>
+        </div>
+      {/if}
       <div class="masthead-right">
         <div class="lang-wrap" bind:this={langWrap}>
           <button class="lang-btn" on:click={() => (langOpen = !langOpen)}>
@@ -108,58 +120,73 @@
             </div>
           {/if}
         </div>
-        <button class="meth-btn" on:click={() => (showMeth = true)}>{t.methodology}</button>
+        {#if !landing}
+          <button class="meth-btn" on:click={() => (showMeth = true)}>{t.methodology}</button>
+        {/if}
       </div>
     </header>
 
-    <!-- ROW 1: selettori -->
-    <div class="row row-selectors">
-      <PlayerSelector player={p1} color={C1} otherRank={p2rank} align="left" {lang} on:select={selectP1} />
-      <PlayerSelector player={p2} color={C2} otherRank={p1rank} align="right" {lang} on:select={selectP2} />
-    </div>
-
-    <!-- ROW 2: tab -->
-    <div class="row row-tabs">
-      <div class="tabs">
-        {#each TAB_KEYS as tk (tk)}
-          <button
-            class="tab-btn"
-            class:active={tab === tk}
-            on:click={() => (tab = tk)}
-          >{t.tabs[tk]}</button>
-        {/each}
+    {#if landing}
+      <!-- LANDING: benvenuto centrato + selettori, niente altro -->
+      <div class="welcome">
+        <h1 class="welcome-title">{t.welcomeTitle}</h1>
+        <p class="welcome-sub">{t.welcomeSub}</p>
+        <!-- un solo selettore: la prima scelta è automaticamente P1 -->
+        <div class="welcome-selectors">
+          <PlayerSelector player={p1} color={C1} otherRank={p2rank} align="left" {lang} on:select={selectP1} />
+        </div>
       </div>
-    </div>
-
-    <!-- ROW 3: stat P1 | radar | stat P2 -->
-    <div class="row row-main">
-      <div class="col-stats">
-        <StatBars player={p1} color={C1} {tab} {lang} align="left" />
+    {:else}
+      <!-- ROW 1: selettori -->
+      <div class="row row-selectors">
+        <PlayerSelector player={p1} color={C1} otherRank={p2rank} align="left" {lang} on:select={selectP1} />
+        <PlayerSelector player={p2} color={C2} otherRank={p1rank} align="right" {lang} on:select={selectP2} />
       </div>
 
-      <div class="col-radar">
-        <RadarChart
-          {p1} {p2} c1={C1} c2={C2}
-          axes={radarData.axes} avgVals={radarData.avg}
-          size={510}
-          fsLabel={15}
-          emptyText={t.noRadar}
-        />
-        <div class="radar-footer">
-          <div class="radar-legend">
-            <svg width="22" height="6">
-              <line x1="0" y1="3" x2="22" y2="3" stroke="var(--avg)" stroke-width="1.4" stroke-dasharray="5 3" />
-            </svg>
-            <span class="legend-label">{t.legend}</span>
-          </div>
-          <span class="radar-hint">{t.hint}</span>
+      <!-- ROW 2: tab -->
+      <div class="row row-tabs">
+        <div class="tabs">
+          {#each TAB_KEYS as tk (tk)}
+            <button
+              class="tab-btn"
+              class:active={tab === tk}
+              on:click={() => (tab = tk)}
+            >{t.tabs[tk]}</button>
+          {/each}
         </div>
       </div>
 
-      <div class="col-stats">
-        <StatBars player={p2} color={C2} {tab} {lang} align="right" />
+      <!-- ROW 3: stat P1 | radar | stat P2 -->
+      <div class="row row-main">
+        <div class="col-stats">
+          <StatBars player={p1} color={C1} {tab} {lang} align="left" />
+        </div>
+
+        <div class="col-radar">
+          <RadarChart
+            {p1} {p2} c1={C1} c2={C2}
+            axes={radarData.axes} avgVals={radarData.avg}
+            size={510}
+            fsLabel={15}
+            emptyText={t.noRadar}
+            avgLabel={t.avgShort}
+          />
+          <div class="radar-footer">
+            <div class="radar-legend">
+              <svg width="22" height="6">
+                <line x1="0" y1="3" x2="22" y2="3" stroke="var(--avg)" stroke-width="1.4" stroke-dasharray="5 3" />
+              </svg>
+              <span class="legend-label">{t.legend}</span>
+            </div>
+            <span class="radar-hint">{t.hint}</span>
+          </div>
+        </div>
+
+        <div class="col-stats">
+          <StatBars player={p2} color={C2} {tab} {lang} align="right" />
+        </div>
       </div>
-    </div>
+    {/if}
   </main>
 
   <!-- MODALE METODOLOGIA -->
@@ -184,18 +211,16 @@
   :global(*) { box-sizing: border-box; margin: 0; padding: 0; }
 
   /* ── TEMA ──
-     Colori: sfondo = --bg/--surf qui sotto; colori giocatori = costanti
+     Colori: sfondo = --bg qui sotto; colori giocatori = costanti
      C1 (P1 blu) e C2 (P2 ocra) in cima al <script> di questo file.
      Font: --serif (display/valori) e --serif-text (testo/corsivi) qui sotto
      + il <link> Google Fonts in index.html. */
   :global(:root) {
     --bg:    #f4efe6;       /* carta calda */
-    --surf:  #f4efe6;
     --surf2: #ede6d8;
     --bord:  #e6dfd2;       /* hairline */
     --rule:  #ddd5c6;
     --ink:   #1c1a17;
-    --accent:#1c1a17;
     --avg:   #9a8f7a;
     --txt:   #1c1a17;
     --muted: #8a8170;
@@ -203,7 +228,7 @@
     --label: #6f6655;
     --serif:       'Spectral', serif;
     --serif-text:  'Newsreader', serif;
-    --fs-bar-label: 16px;
+    --fs-bar-label: 18px;
     --fs-bar-value: 28px;
     --fs-player:    34px;
     --fs-tabs:      19px;
@@ -212,7 +237,7 @@
   /* Schermi piccoli (es. portatili 13"): stessi rapporti, misure ridotte */
   @media (max-width: 1500px) {
     :global(:root) {
-      --fs-bar-label: 14px;
+      --fs-bar-label: 16px;
       --fs-bar-value: 23px;
       --fs-player:    28px;
       --fs-tabs:      17px;
@@ -280,8 +305,77 @@
     letter-spacing: -0.01em;
   }
 
+  /* il titolo è un bottone che riporta alla landing */
+  .title-link {
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .title-link:hover { text-decoration: underline 1px dotted var(--muted2); text-underline-offset: 5px; }
+
+  .masthead-title-sub {
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--muted);
+    margin-left: 10px;
+  }
+
   @media (max-width: 1500px) {
     .masthead-title { font-size: 23px; }
+    .masthead-title-sub { font-size: 15px; }
+  }
+
+  /* landing: resta solo il dropdown lingua in alto a destra */
+  .masthead.bare {
+    border-bottom: none;
+    justify-content: flex-end;
+    padding-bottom: 0;
+  }
+
+  /* ── WELCOME (landing) ── */
+  .welcome {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding-bottom: 6vh; /* compensa otticamente la riga lingua in alto */
+  }
+
+  .welcome-title {
+    font-family: var(--serif);
+    font-size: 44px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+
+  .welcome-sub {
+    font-family: var(--serif-text);
+    font-size: 21px;
+    font-style: italic;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+
+  .welcome-selectors {
+    display: flex;
+    justify-content: center;
+    margin-top: 44px;
+  }
+
+  /* il selettore non deve allargarsi a tutta pagina: solo il trigger */
+  .welcome-selectors :global(.selector-wrap) { width: auto; }
+
+  @media (max-width: 1500px) {
+    .welcome-title { font-size: 36px; }
+    .welcome-sub { font-size: 18px; }
+    .welcome-selectors { margin-top: 36px; }
   }
 
   .masthead-right {
@@ -361,20 +455,23 @@
 
   .row { display: grid; gap: 10px; }
 
-  /* margin-top calibrato perché il blocco nome (eyebrow+nome) risulti al
-     centro verticale della fascia tra il filetto nero (masthead) e la
-     linea grigia dei tab: spazio sopra ≈ spazio sotto + altezza tab */
+  /* margin-top calibrato per centrare il nome nella fascia filetto nero →
+     linea grigia: spazio sopra il nome ≈ spazio sotto + altezza tab.
+     (è il minimo possibile: meno di così il nome non può essere centrato) */
   .row-selectors {
     grid-template-columns: 1fr 1fr;
     align-items: center;
     gap: 24px;
-    margin-top: 32px;
+    margin-top: 25px;
     flex-shrink: 0;
   }
 
   @media (max-width: 1500px) {
-    .row-selectors { margin-top: 27px; }
+    .row-selectors { margin-top: 21px; }
   }
+
+  /* avvicina i tab al nome (riduce l'altezza totale della sezione) */
+  .row-tabs { margin-top: -6px; }
 
   .row-tabs {
     grid-template-columns: 1fr;
@@ -393,14 +490,14 @@
     font-size: var(--fs-tabs, 19px);
     font-weight: 400;
     color: var(--muted2);
-    padding: 3px 34px 5px;
+    padding: 2px 34px 4px;
     border-bottom: 2px solid transparent;
     margin-bottom: -1px;
     transition: color 0.15s;
   }
 
   @media (max-width: 1500px) {
-    .tab-btn { padding: 2px 26px 4px; }
+    .tab-btn { padding: 1px 26px 3px; }
   }
 
   .tab-btn:not(.active):hover { color: var(--txt); }
@@ -424,10 +521,11 @@
     .row-main { grid-template-columns: 280px 1fr 280px; gap: 22px; }
   }
 
+  /* niente overflow: taglierebbe i tooltip info e farebbe comparire
+     scrollbar interne; se mai il contenuto sborda, scrolla la pagina */
   .col-stats {
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
   }
 
   /* Il radar (margin: auto sull'SVG) si centra verticalmente nella fascia
@@ -440,11 +538,11 @@
     flex-direction: column;
     align-items: center;
     padding: 12px 12px 8px;
-    min-height: 700px;
+    min-height: 720px;
   }
 
   @media (max-width: 1500px) {
-    .col-radar { min-height: 600px; }
+    .col-radar { min-height: 620px; }
     .col-radar :global(.radar-svg) { width: 430px; height: 430px; }
   }
 
@@ -465,14 +563,14 @@
 
   .legend-label {
     font-family: var(--serif-text);
-    font-size: 13px;
+    font-size: 17px;
     font-style: italic;
     color: var(--muted);
   }
 
   .radar-hint {
     font-family: var(--serif-text);
-    font-size: 11px;
+    font-size: 15px;
     font-style: italic;
     color: var(--muted2);
   }

@@ -6,6 +6,12 @@
   export let tab;
   export let align = 'left'; // 'left' | 'right' — colonna specchiata per P2
   export let lang = 'it';
+
+  // tooltip info aperto via click/tap (su desktop basta l'hover CSS)
+  let infoOpen = null;
+  function toggleInfo(key) {
+    infoOpen = infoOpen === key ? null : key;
+  }
 </script>
 
 <div class="stats-panel">
@@ -23,9 +29,20 @@
       ? Math.max(0, Math.min(100, raw))
       : Math.max(0, Math.min(100, ((raw - mn) / (mx - mn)) * 100)))}
 
+    {@const info = lang === 'en' && stat.en?.info ? stat.en.info : stat.info}
+
     <div class="stat-row">
       <div class="stat-meta" class:reversed={align === 'right'}>
-        <span class="stat-label">{statLabel(stat, lang)}</span>
+        <span class="stat-label">
+          {statLabel(stat, lang)}{#if info}<span class="info-wrap" class:open={infoOpen === stat.key}>
+            <button
+              class="info-btn"
+              on:click={() => toggleInfo(stat.key)}
+              aria-label={info}
+            >i</button>
+            <span class="info-tip" class:from-right={align === 'right'}>{info}</span>
+          </span>{/if}
+        </span>
         <span class="stat-value" style="color: {raw == null ? 'var(--muted)' : 'var(--ink)'}">
           {#if raw == null}—{:else}{raw}<span class="stat-unit">{stat.unit}</span>{/if}
         </span>
@@ -65,9 +82,68 @@
 
   .stat-label {
     font-family: var(--serif-text);
-    font-size: var(--fs-bar-label, 16px);
+    font-size: var(--fs-bar-label, 18px);
     font-style: italic;
     color: var(--label);
+  }
+
+  .info-wrap {
+    position: relative;
+    display: inline-block;
+    margin-left: 6px;
+  }
+
+  .info-btn {
+    width: 15px;
+    height: 15px;
+    border: 1px solid var(--muted2);
+    border-radius: 50%;
+    font-family: var(--serif);
+    font-size: 10px;
+    font-style: normal;
+    line-height: 1;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: 2px;
+    cursor: help;
+    padding: 0;
+  }
+
+  .info-wrap:hover .info-btn,
+  .info-wrap.open .info-btn {
+    color: var(--ink);
+    border-color: var(--ink);
+  }
+
+  .info-tip {
+    display: none;
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: -4px;
+    width: max-content;
+    max-width: 190px;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    box-shadow: 0 8px 24px rgba(28, 26, 23, 0.16);
+    padding: 5px 9px;
+    font-family: var(--serif-text);
+    font-size: 12px;
+    font-style: italic;
+    line-height: 1.4;
+    color: var(--label);
+    z-index: 100;
+  }
+
+  .info-tip.from-right {
+    left: auto;
+    right: -4px;
+  }
+
+  .info-wrap:hover .info-tip,
+  .info-wrap.open .info-tip {
+    display: block;
   }
 
   .stat-value {

@@ -10,6 +10,7 @@
   export let size = 420;    // rendered px width/height (viewBox stays 0 0 420 420)
   export let fsLabel = 11;  // font size for axis labels (in SVG user units)
   export let emptyText = 'Statistiche insufficienti per il grafico radar';
+  export let avgLabel = 'Media'; // etichetta della media nei valori hover
 
   // Internal coordinate system is always 420×420
   const SZ  = 420;
@@ -159,21 +160,21 @@
       <!-- inline values on hover, centered on label, stacked outward from
            chart; players non selezionati non occupano righe -->
       {#if isH}
-        {@const lines = [
-          ...(p1 ? [{ val: p1[ax.key], color: c1 }] : []),
-          ...(p2 ? [{ val: p2[ax.key], color: c2 }] : []),
-        ]}
         {@const avgV = avgVals[i]}
+        {@const lines = [
+          ...(p1 ? [{ text: p1[ax.key] != null ? `${p1[ax.key]}${ax.unit}` : '—', color: c1, fs: fsLabel + 1, w: 700 }] : []),
+          ...(p2 ? [{ text: p2[ax.key] != null ? `${p2[ax.key]}${ax.unit}` : '—', color: c2, fs: fsLabel + 1, w: 700 }] : []),
+          { text: `${avgLabel}: ${avgV != null ? (+avgV).toFixed(1) + ax.unit : '—'}`, color: 'var(--avg)', fs: fsLabel, w: 500 },
+        ]}
         {#each lines as ln, j}
-          <text x={lx} y={ly + dir * LINE_H * (j + 1)}
+          <!-- sopra il label (dir = -1) gli slot vanno invertiti, così
+               l'ordine visivo dall'alto è sempre: P1, P2, media -->
+          {@const slot = dir === 1 ? j + 1 : lines.length - j}
+          <text x={lx} y={ly + dir * LINE_H * slot}
             text-anchor="middle" dominant-baseline="middle"
-              font-size={fsLabel + 1} font-weight="700" fill={ln.color}
-          >{ln.val != null ? `${ln.val}${ax.unit}` : '—'}</text>
+            font-size={ln.fs} font-weight={ln.w} fill={ln.color}
+          >{ln.text}</text>
         {/each}
-        <text x={lx} y={ly + dir * LINE_H * (lines.length + 1)}
-          text-anchor="middle" dominant-baseline="middle"
-          font-size={fsLabel} font-weight="500" fill="var(--avg)"
-        >⌀ {avgV != null ? (+avgV).toFixed(1) + ax.unit : '—'}</text>
       {/if}
     </g>
   {/each}

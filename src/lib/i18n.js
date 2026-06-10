@@ -20,7 +20,11 @@ export function setLangInURL(lang) {
 
 export const UI = {
   en: {
-    title: "ATP Top 50 - Last 52 weeks",
+    titleMain: "ATP Top 50 - Player Performance",
+    titleSub: "Last 52 weeks",
+    avgShort: "Avg",
+    welcomeTitle: "Welcome to the ATP Top 50 Player Performance",
+    welcomeSub: "Select a player to begin",
     methodology: "Methodology",
     methTitle: "Source & methodology",
     methP1:
@@ -40,7 +44,11 @@ export const UI = {
     },
   },
   it: {
-    title: "ATP Top 50 - Ultime 52 settimane",
+    titleMain: "ATP Top 50 - Performance Giocatori",
+    titleSub: "Ultime 52 settimane",
+    avgShort: "Media",
+    welcomeTitle: "Benvenuto in ATP Top 50 - Performance Giocatori",
+    welcomeSub: "Seleziona un giocatore per iniziare",
     methodology: "Metodologia",
     methTitle: "Fonte e metodologia",
     methP1:
