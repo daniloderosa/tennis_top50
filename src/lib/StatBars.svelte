@@ -1,7 +1,7 @@
 <script>
   import { STAT_TABS, STAT_RANGES, statLabel } from './data.js';
 
-  export let player;
+  export let player = null; // null = nessun giocatore selezionato
   export let color;
   export let tab;
   export let align = 'left'; // 'left' | 'right' — colonna specchiata per P2
@@ -10,16 +10,18 @@
 
 <div class="stats-panel">
   {#each STAT_TABS[tab] as stat (stat.key)}
-    {@const raw = player[stat.key]}
+    {@const raw = player?.[stat.key]}
     {@const isPercent = stat.unit === '%'}
     {@const range = STAT_RANGES[stat.key]}
     {@const mn = range?.min ?? 0}
     {@const mx = range?.max ?? 1}
     <!-- Il riempimento riflette sempre il valore reale (niente inversione
-         per le stat flip: 2.2% di doppi falli riempie il 2.2%) -->
-    {@const barPct = raw == null ? 0 : isPercent
+         per le stat flip: 2.2% di doppi falli riempie il 2.2%).
+         Minimo 2%: il migliore nelle stat non-% avrebbe barra vuota,
+         che sembrerebbe un dato mancante. -->
+    {@const barPct = raw == null ? 0 : Math.max(2, isPercent
       ? Math.max(0, Math.min(100, raw))
-      : Math.max(0, Math.min(100, ((raw - mn) / (mx - mn)) * 100))}
+      : Math.max(0, Math.min(100, ((raw - mn) / (mx - mn)) * 100)))}
 
     <div class="stat-row">
       <div class="stat-meta" class:reversed={align === 'right'}>

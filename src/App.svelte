@@ -8,8 +8,27 @@
   const C1 = '#2f5d8a';
   const C2 = '#b8722c';
 
-  let p1rank = +(localStorage.getItem('atpb50_p1') || 1);
-  let p2rank = +(localStorage.getItem('atpb50_p2') || 2);
+  // Giocatori: nessuna selezione di default; la scelta vive solo nell'URL
+  // (?p1=jannik-sinner&p2=carlos-alcaraz) così ogni confronto ha un link
+  // salvabile nei segnalibri.
+  function slugify(name) {
+    return name
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  function rankFromSlug(slug) {
+    if (!slug) return null;
+    return PLAYERS.find(p => slugify(p.full) === slug)?.rank ?? null;
+  }
+
+  const initParams = new URLSearchParams(window.location.search);
+  let p1rank = rankFromSlug(initParams.get('p1'));
+  let p2rank = rankFromSlug(initParams.get('p2'));
+
   let tab = (() => {
     const t = localStorage.getItem('atpb50_tab');
     return TAB_KEYS.includes(t) ? t : TAB_KEYS[0];
@@ -23,16 +42,23 @@
   let langWrap;
 
   $: t = UI[lang];
-  $: p1 = PLAYERS.find(p => p.rank === p1rank) ?? PLAYERS[0];
-  $: p2 = PLAYERS.find(p => p.rank === p2rank) ?? PLAYERS[1];
+  $: p1 = p1rank == null ? null : (PLAYERS.find(p => p.rank === p1rank) ?? null);
+  $: p2 = p2rank == null ? null : (PLAYERS.find(p => p.rank === p2rank) ?? null);
   $: radarData = getTabRadarData(tab, lang);
 
-  $: { localStorage.setItem('atpb50_p1', p1rank); }
-  $: { localStorage.setItem('atpb50_p2', p2rank); }
   $: { localStorage.setItem('atpb50_tab', tab); }
 
-  function selectP1(e) { p1rank = e.detail; }
-  function selectP2(e) { p2rank = e.detail; }
+  function syncPlayersURL() {
+    const url = new URL(window.location);
+    const s1 = p1rank == null ? null : PLAYERS.find(p => p.rank === p1rank);
+    const s2 = p2rank == null ? null : PLAYERS.find(p => p.rank === p2rank);
+    if (s1) url.searchParams.set('p1', slugify(s1.full)); else url.searchParams.delete('p1');
+    if (s2) url.searchParams.set('p2', slugify(s2.full)); else url.searchParams.delete('p2');
+    history.replaceState({}, '', url);
+  }
+
+  function selectP1(e) { p1rank = e.detail; syncPlayersURL(); }
+  function selectP2(e) { p2rank = e.detail; syncPlayersURL(); }
 
   function changeLang(l) {
     lang = l;
@@ -61,7 +87,6 @@
     <header class="masthead">
       <div class="masthead-title">{t.title}</div>
       <div class="masthead-right">
-        <button class="meth-btn" on:click={() => (showMeth = true)}>{t.methodology}</button>
         <div class="lang-wrap" bind:this={langWrap}>
           <button class="lang-btn" on:click={() => (langOpen = !langOpen)}>
             <span class="lang-flag">{LANG_META[lang].flag}</span>
@@ -83,6 +108,7 @@
             </div>
           {/if}
         </div>
+        <button class="meth-btn" on:click={() => (showMeth = true)}>{t.methodology}</button>
       </div>
     </header>
 
@@ -177,7 +203,7 @@
     --fs-bar-label: 16px;
     --fs-bar-value: 28px;
     --fs-player:    34px;
-    --fs-tabs:      17px;
+    --fs-tabs:      19px;
   }
 
   /* Schermi piccoli (es. portatili 13"): stessi rapporti, misure ridotte */
@@ -186,7 +212,7 @@
       --fs-bar-label: 14px;
       --fs-bar-value: 23px;
       --fs-player:    28px;
-      --fs-tabs:      15px;
+      --fs-tabs:      17px;
     }
   }
 
@@ -218,12 +244,12 @@
     padding: 26px 36px 20px;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 11px;
     min-height: 0;
   }
 
   @media (max-width: 1500px) {
-    main { padding: 18px 28px 14px; gap: 14px; }
+    main { padding: 18px 28px 14px; gap: 9px; }
   }
 
   /* ── MASTHEAD ── */
@@ -328,6 +354,7 @@
     grid-template-columns: 1fr 1fr;
     align-items: center;
     gap: 24px;
+    margin-top: 4px;
     flex-shrink: 0;
   }
 
@@ -345,18 +372,18 @@
 
   .tab-btn {
     font-family: var(--serif);
-    font-size: var(--fs-tabs, 17px);
+    font-size: var(--fs-tabs, 19px);
     font-weight: 400;
     font-style: italic;
     color: var(--muted2);
-    padding: 8px 30px;
+    padding: 5px 34px 6px;
     border-bottom: 2px solid transparent;
     margin-bottom: -1px;
     transition: color 0.15s;
   }
 
   @media (max-width: 1500px) {
-    .tab-btn { padding: 7px 22px; }
+    .tab-btn { padding: 4px 26px 5px; }
   }
 
   .tab-btn:not(.active):hover { color: var(--txt); }

@@ -17,7 +17,7 @@ export const STAT_TABS = {
     { key: 's2w',     label: 'Punti vinti con la seconda %',                     short: '% vinti 2ª srv',  unit: '%', flip: false, en: { label: '2nd serve points won %',                    short: 'Won on 2nd' } },
     { key: 's2w_inp', label: 'Punti vinti con la seconda (escl. doppi falli) %', short: '% 2ª pressione',  unit: '%', flip: false, en: { label: '2nd serve points won (excl. DFs) %',        short: '2nd srv pressure' } },
     { key: 'hold',    label: 'Game vinti al servizio %',                         short: 'Hold %',          unit: '%', flip: false, en: { label: 'Service games held %',                      short: 'Hold %' } },
-    { key: 'pts_sg',  label: 'Punti giocati per game al servizio',               short: 'Punti/game srv',  unit: '',  flip: false, en: { label: 'Points per service game',                   short: 'Pts/srv game' } },
+    { key: 'pts_sg',  label: 'Punti giocati per game al servizio',               short: 'Punti/game srv',  unit: '',  flip: true,  en: { label: 'Points per service game',                   short: 'Pts/srv game' } },
     { key: 'ptsl_sg', label: 'Punti persi per game al servizio',                 short: 'Persi/game srv',  unit: '',  flip: true,  en: { label: 'Points lost per service game',              short: 'Lost/srv game' } },
   ],
   Risposta: [
@@ -51,11 +51,11 @@ export const STAT_TABS = {
     { key: 'tie',         label: 'Tiebreak vinti %',             short: '% TB vinti',        unit: '%', flip: false, en: { label: 'Tiebreaks won %',          short: 'TBs won' } },
     { key: 'setwon',      label: 'Set vinti %',                  short: '% set vinti',       unit: '%', flip: false, en: { label: 'Sets won %',               short: 'Sets won' } },
     { key: 'gwon',        label: 'Game vinti %',                 short: '% game vinti',      unit: '%', flip: false, en: { label: 'Games won %',              short: 'Games won' } },
-    { key: 'opp_rnk_med', label: 'Classifica mediana avversari', short: 'Rank avv. mediano', unit: '',  flip: false, en: { label: 'Median opponent ranking',  short: 'Median opp rank' } },
-    { key: 'opp_rnk_avg', label: 'Classifica media avversari',   short: 'Rank avv. medio',   unit: '',  flip: false, en: { label: 'Average opponent ranking', short: 'Avg opp rank' } },
-    { key: 'dur_m',       label: 'Durata match (min.)',          short: 'Durata match',      unit: '',  flip: false, en: { label: 'Match duration (min.)',    short: 'Match dur.' } },
-    { key: 'dur_s',       label: 'Durata set (min.)',            short: 'Durata set',        unit: '',  flip: false, en: { label: 'Set duration (min.)',      short: 'Set dur.' } },
-    { key: 'dur_pt',      label: 'Durata punti (sec.)',          short: 'Durata punto',      unit: '',  flip: false, en: { label: 'Point duration (sec.)',    short: 'Point dur.' } },
+    { key: 'opp_rnk_med', label: 'Classifica mediana avversari', short: 'Rank avv. mediano', unit: '',  flip: true,  en: { label: 'Median opponent ranking',  short: 'Median opp rank' } },
+    { key: 'opp_rnk_avg', label: 'Classifica media avversari',   short: 'Rank avv. medio',   unit: '',  flip: true,  en: { label: 'Average opponent ranking', short: 'Avg opp rank' } },
+    { key: 'dur_m',       label: 'Durata match (min.)',          short: 'Durata match',      unit: '',  flip: true,  en: { label: 'Match duration (min.)',    short: 'Match dur.' } },
+    { key: 'dur_s',       label: 'Durata set (min.)',            short: 'Durata set',        unit: '',  flip: true,  en: { label: 'Set duration (min.)',      short: 'Set dur.' } },
+    { key: 'dur_pt',      label: 'Durata punti (sec.)',          short: 'Durata punto',      unit: '',  flip: true,  en: { label: 'Point duration (sec.)',    short: 'Point dur.' } },
   ],
 };
 

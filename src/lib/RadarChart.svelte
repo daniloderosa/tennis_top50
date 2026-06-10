@@ -1,8 +1,8 @@
 <script>
   import { norm } from './data.js';
 
-  export let p1;
-  export let p2;
+  export let p1 = null; // null = giocatore non selezionato
+  export let p2 = null;
   export let c1;
   export let c2;
   export let axes = [];
@@ -32,8 +32,8 @@
     return ax.flip ? 1 - n : n;
   }
 
-  $: v1   = axes.map(ax => normV(p1[ax.key], ax));
-  $: v2   = axes.map(ax => normV(p2[ax.key], ax));
+  $: v1   = p1 ? axes.map(ax => normV(p1[ax.key], ax)) : null;
+  $: v2   = p2 ? axes.map(ax => normV(p2[ax.key], ax)) : null;
   $: vAvg = axes.map((ax, i) => normV(avgVals[i] ?? 0, ax));
 
   function makePath(vs, angs) {
@@ -45,8 +45,8 @@
     }).join('') + 'Z';
   }
 
-  $: path1   = makePath(v1, angles);
-  $: path2   = makePath(v2, angles);
+  $: path1   = v1 ? makePath(v1, angles) : '';
+  $: path2   = v2 ? makePath(v2, angles) : '';
   $: pathAvg = makePath(vAvg, angles);
 
   $: ringPolys = rings.map(rv =>
@@ -97,15 +97,19 @@
     stroke-dasharray="5 3" stroke-linejoin="round" />
 
   <!-- P2 polygon -->
-  <path d={path2} fill={c2} fill-opacity="0.07" stroke={c2}
-    stroke-width="1.6" stroke-linejoin="round" />
+  {#if path2}
+    <path d={path2} fill={c2} fill-opacity="0.07" stroke={c2}
+      stroke-width="1.6" stroke-linejoin="round" />
+  {/if}
 
   <!-- P1 polygon -->
-  <path d={path1} fill={c1} fill-opacity="0.07" stroke={c1}
-    stroke-width="1.6" stroke-linejoin="round" />
+  {#if path1}
+    <path d={path1} fill={c1} fill-opacity="0.07" stroke={c1}
+      stroke-width="1.6" stroke-linejoin="round" />
+  {/if}
 
   <!-- P1 dots -->
-  {#each v1 as v, i}
+  {#each v1 ?? [] as v, i}
     <circle
       cx={(CX + Math.cos(angles[i]) * R * v).toFixed(1)}
       cy={(CY + Math.sin(angles[i]) * R * v).toFixed(1)}
@@ -114,7 +118,7 @@
   {/each}
 
   <!-- P2 dots -->
-  {#each v2 as v, i}
+  {#each v2 ?? [] as v, i}
     <circle
       cx={(CX + Math.cos(angles[i]) * R * v).toFixed(1)}
       cy={(CY + Math.sin(angles[i]) * R * v).toFixed(1)}
@@ -150,22 +154,22 @@
         fill={isH ? 'var(--ink)' : 'var(--muted)'}
       >{ax.short ?? ax.label}</text>
 
-      <!-- inline values on hover, centered on label, stacked outward from chart -->
+      <!-- inline values on hover, centered on label, stacked outward from
+           chart; players non selezionati non occupano righe -->
       {#if isH}
-        {@const val1 = p1[ax.key]}
-        {@const val2 = p2[ax.key]}
+        {@const lines = [
+          ...(p1 ? [{ val: p1[ax.key], color: c1 }] : []),
+          ...(p2 ? [{ val: p2[ax.key], color: c2 }] : []),
+        ]}
         {@const avgV = avgVals[i]}
-        <text x={lx} y={ly + dir * LINE_H}
-          text-anchor="middle" dominant-baseline="middle"
-          font-family="'Spectral', serif"
-          font-size={fsLabel + 1} font-weight="700" fill={c1}
-        >{val1 != null ? `${val1}${ax.unit}` : '—'}</text>
-        <text x={lx} y={ly + dir * LINE_H * 2}
-          text-anchor="middle" dominant-baseline="middle"
-          font-family="'Spectral', serif"
-          font-size={fsLabel + 1} font-weight="700" fill={c2}
-        >{val2 != null ? `${val2}${ax.unit}` : '—'}</text>
-        <text x={lx} y={ly + dir * LINE_H * 3}
+        {#each lines as ln, j}
+          <text x={lx} y={ly + dir * LINE_H * (j + 1)}
+            text-anchor="middle" dominant-baseline="middle"
+            font-family="'Spectral', serif"
+            font-size={fsLabel + 1} font-weight="700" fill={ln.color}
+          >{ln.val != null ? `${ln.val}${ax.unit}` : '—'}</text>
+        {/each}
+        <text x={lx} y={ly + dir * LINE_H * (lines.length + 1)}
           text-anchor="middle" dominant-baseline="middle"
           font-family="'Spectral', serif"
           font-size={fsLabel} font-weight="500" fill="var(--avg)"

@@ -39,7 +39,7 @@ Mapping colonne particolari: `MdOppRk`→opp_rnk_med, `MnOppRk`→opp_rnk_avg, `
 - **Nessun min/max hardcoded**: `STAT_RANGES` in `data.js` calcola min/max a runtime dai dati reali dei top-50 per tutte le stat non-%. Le stat % usano anch'esse il range reale del top-50 (non 0–100) nel radar.
 - `getTabRadarData(tabKey, lang)` genera assi + media top-50 per il tab corrente: il radar mostra le stat della sezione attiva, con etichette localizzate.
 - 4 sezioni (`STAT_TABS`): Servizio, Risposta, Palle Break, Altro (chiavi italiane = ID interni, anche in localStorage; i nomi mostrati passano da `UI[lang].tabs`). Ogni stat ha `label`/`short` (IT), `en: { label, short }`, `unit`, `flip`.
-- **`flip` vale solo per il radar** (valore basso = raggio lungo, es. doppi falli). Le **barre** riempiono sempre in proporzione al valore reale (2.2% DF → barra al 2.2%; non-% normalizzate min–max senza inversione) — scelta esplicita dell'utente.
+- **`flip` vale solo per il radar** (valore basso = raggio lungo). Stat flip: df, df2s, vace, ptsl_sg, bpfaced, bpvs_s/m, bkn_s/m, **pts_sg, opp_rnk_med, opp_rnk_avg, dur_m, dur_s, dur_pt**. Le **barre** riempiono sempre in proporzione al valore reale (2.2% DF → barra al 2.2%; non-% normalizzate min–max senza inversione), con **riempimento minimo 2%** quando il dato c'è (il migliore nelle non-% avrebbe barra vuota = sembrerebbe dato mancante) — scelte esplicite dell'utente.
 - `spw_inp` ("Punti vinti al servizio escl. Ace e DF") **rimossa** dalla UI su richiesta utente; classifica mediana/media avversari stanno nella sezione **Altro**.
 
 ## Layout / UI — direzione "Editoriale" (B, da Claude Design)
@@ -50,7 +50,7 @@ Stile data-journalism serif su carta calda (mockup: direzione B di "ATP Best 50 
 - colonne stat: **330px** (grid `330px 1fr 330px`, gap 30px); sotto i **1500px**: 280px, gap 22px
 - **Breakpoint 1500px** (portatili 13"): stessi rapporti, misure ridotte via media query sulle CSS vars (--fs-bar-value 28→23, --fs-player 34→28, --fs-tabs 17→15, --fs-bar-label 16→14) e radar 510→430 (override CSS su `.radar-svg`)
 - Palette: carta `#f4efe6`, inchiostro `#1c1a17`, P1 blu `#2f5d8a`, P2 ocra `#b8722c`, media `#9a8f7a`, hairline `#e6dfd2` (CSS vars in `:root` di App.svelte)
-- Masthead: titolo "ATP Top 50 — Ultime 52 settimane / Last 52 weeks" (niente kicker), filetto 2px inchiostro; a destra bottone **Metodologia** (apre modale con backdrop blur — il footer è stato rimosso) e **dropdown lingua** con bandierine
+- Masthead: titolo "ATP Top 50 — Ultime 52 settimane / Last 52 weeks" (niente kicker), filetto 2px inchiostro; a destra **dropdown lingua** con bandierine e poi bottone **Metodologia** (apre modale con backdrop blur — il footer è stato rimosso)
 - Selettori giocatore: nome grande serif con sottolineatura puntinata, eyebrow "N°rank · NAZ" colorata; dropdown su carta con hairline (P2 allineato/specchiato a destra, prop `align`)
 - Righe stat: label Newsreader corsivo, valore Spectral inchiostro, barra 3px su track hairline; colonna P2 specchiata (prop `align` su StatBars)
 - Tab: serif centrati su filetto, attivo = normale 600 + underline inchiostro, inattivi = corsivo
@@ -59,7 +59,8 @@ Stile data-journalism serif su carta calda (mockup: direzione B di "ATP Best 50 
 - Legenda "media dei primi 50" + hint mouse: in fondo alla colonna radar; l'SVG ha `margin: auto` e `.col-radar` un min-height che evita l'accavallamento con i valori hover dell'asse in basso (che sbordano dal box SVG)
 - **H2H rimosso** (niente dati; l'utente deciderà in futuro come reperirli)
 - Ignorati dal mockup (per scelta utente): filtri superficie (Tutte/Cemento/Terra/Erba)
-- Selezione giocatori e tab persistite in localStorage (`atpb50_p1`, `atpb50_p2`, `atpb50_tab`); la lingua NO (vive solo nell'URL, così i bookmark restano fedeli)
+- **Giocatori: nessuna selezione di default** (barre vuote, radar con sola media top-50). La selezione vive **solo nell'URL** come slug dei nomi (`?p1=jannik-sinner&p2=carlos-alcaraz`, `history.replaceState`) per link bookmarkabili — niente localStorage per i giocatori. Solo il tab è persistito (`atpb50_tab`); la lingua vive nell'URL (`?lang=`)
+- Sezione nomi+tab compatta (main gap 11px / 9px small; trigger selector senza padding); tab 19px (17px small)
 
 ## Deploy
 

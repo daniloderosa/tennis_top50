@@ -1,8 +1,9 @@
 <script>
   import { PLAYERS } from './data.js';
+  import { UI } from './i18n.js';
   import { createEventDispatcher, onMount } from 'svelte';
 
-  export let player;
+  export let player = null; // null = nessuna selezione
   export let color;
   export let otherRank;
   export let align = 'left'; // 'left' | 'right'
@@ -45,9 +46,9 @@
 
 <div class="selector-wrap" class:right={align === 'right'} bind:this={container}>
   <button class="trigger" class:right={align === 'right'} on:click={() => (open = !open)}>
-    <span class="player-eyebrow" style="color: {color}">N°{player.rank} · {player.nat}</span>
+    <span class="player-eyebrow" style="color: {color}">{player ? `N°${player.rank} · ${player.nat}` : ' '}</span>
     <span class="player-line">
-      <span class="player-name">{player.full}</span>
+      <span class="player-name" class:placeholder={!player}>{player ? player.full : UI[lang].selectPlayer}</span>
       <span class="arrow" class:rotated={open}>▾</span>
     </span>
   </button>
@@ -67,12 +68,12 @@
         {#each filtered as p (p.rank)}
           <button
             class="list-item"
-            class:active={p.rank === player.rank}
-            style="border-left-color: {p.rank === player.rank ? color : 'transparent'};
-                   background: {p.rank === player.rank ? color + '14' : 'transparent'}"
+            class:active={p.rank === player?.rank}
+            style="border-left-color: {p.rank === player?.rank ? color : 'transparent'};
+                   background: {p.rank === player?.rank ? color + '14' : 'transparent'}"
             on:click={() => select(p)}
             on:mouseenter={e => { e.currentTarget.style.background = color + '14'; }}
-            on:mouseleave={e => { e.currentTarget.style.background = p.rank === player.rank ? color + '14' : 'transparent'; }}
+            on:mouseleave={e => { e.currentTarget.style.background = p.rank === player?.rank ? color + '14' : 'transparent'; }}
           >
             <span class="list-rank">N°{p.rank}</span>
             <span class="list-name">{p.full}</span>
@@ -96,9 +97,9 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 1px;
+    gap: 0;
     text-align: left;
-    padding: 2px 0;
+    padding: 0;
     cursor: pointer;
   }
 
@@ -131,6 +132,12 @@
     letter-spacing: -0.01em;
     white-space: nowrap;
     border-bottom: 1px dotted var(--muted2);
+  }
+
+  .player-name.placeholder {
+    color: var(--muted2);
+    font-weight: 500;
+    font-style: italic;
   }
 
   .arrow {

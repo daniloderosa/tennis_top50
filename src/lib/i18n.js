@@ -31,6 +31,7 @@ export const UI = {
     hint: 'hover the labels to see the values',
     noRadar: 'Not enough statistics for the radar chart',
     search: 'Search…',
+    selectPlayer: 'Select a player',
     tabs: {
       'Servizio': 'Serve',
       'Risposta': 'Return',
@@ -50,6 +51,7 @@ export const UI = {
     hint: 'passa il mouse sulle etichette per i valori',
     noRadar: 'Statistiche insufficienti per il grafico radar',
     search: 'Cerca…',
+    selectPlayer: 'Seleziona un giocatore',
     tabs: {
       'Servizio': 'Servizio',
       'Risposta': 'Risposta',
