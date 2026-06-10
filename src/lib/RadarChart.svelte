@@ -78,7 +78,7 @@
     <polygon
       points={pts}
       fill="none"
-      stroke={ri === rings.length - 1 ? '#b7ab95' : '#ddd5c6'}
+      stroke={ri === rings.length - 1 ? '#b3b9b6' : '#d9dcdb'}
       stroke-width={ri === rings.length - 1 ? 1.4 : 0.7}
     />
   {/each}
@@ -89,7 +89,7 @@
       x1={CX} y1={CY}
       x2={(CX + Math.cos(a) * R).toFixed(1)}
       y2={(CY + Math.sin(a) * R).toFixed(1)}
-      stroke="#e3dccf" stroke-width="0.8"
+      stroke="#e3e5e4" stroke-width="0.8"
     />
   {/each}
 

@@ -5,8 +5,8 @@
   import PlayerSelector from './lib/PlayerSelector.svelte';
   import { UI, LANG_META, getLangFromURL, setLangInURL } from './lib/i18n.js';
 
-  const C1 = '#2f5d8a';
-  const C2 = '#b8722c';
+  const C1 = '#0d8652';
+  const C2 = '#E58F65';
 
   // Giocatori: nessuna selezione di default; la scelta vive solo nell'URL
   // (?p1=jannik-sinner&p2=carlos-alcaraz) così ogni confronto ha un link
@@ -216,18 +216,18 @@
      Font: --serif (display/valori) e --serif-text (testo/corsivi) qui sotto
      + il <link> Google Fonts in index.html. */
   :global(:root) {
-    --bg:    #f4efe6;       /* carta calda */
-    --surf2: #ede6d8;
-    --bord:  #e6dfd2;       /* hairline */
-    --rule:  #ddd5c6;
-    --ink:   #1c1a17;
-    --avg:   #9a8f7a;
-    --txt:   #1c1a17;
-    --muted: #8a8170;
-    --muted2:#a89d88;
-    --label: #6f6655;
-    --serif:       'Spectral', serif;
-    --serif-text:  'Newsreader', serif;
+    --bg:    #eeeeee;       /* carta */
+    --surf2: #e4e7e5;
+    --bord:  #dde0de;       /* hairline chiara */
+    --rule:  #d4d7d5;       /* hairline scura */
+    --ink:   #1b1d1c;
+    --avg:   #929e9a;
+    --txt:   #1b1d1c;
+    --muted: #717a76;
+    --muted2:#9aa39e;
+    --label: #565e5a;
+    --serif:       'Lora', serif;
+    --serif-text:  'Lora', serif;
     --fs-bar-label: 18px;
     --fs-bar-value: 28px;
     --fs-player:    34px;
