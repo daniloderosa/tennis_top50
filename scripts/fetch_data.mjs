@@ -45,6 +45,14 @@ function num(val) {
   return isNaN(n) ? null : n;
 }
 
+// Durate in formato "h:mm" (es. Time/Mt "1:45") → minuti totali
+function durMin(val) {
+  if (val === undefined || val === null || val === "") return null;
+  const m = String(val).trim().match(/^(\d+):(\d+)$/);
+  if (m) return Number(m[1]) * 60 + Number(m[2]);
+  return num(val);
+}
+
 function mergeSheets(sheets) {
   const byPlayer = {};
   for (const rows of Object.values(sheets)) {
@@ -108,7 +116,7 @@ function mergeSheets(sheets) {
       tie:      num(r["TB W%"]),                                       // Tiebreak Won %
       setwon:   num(r["S W%"]),                                        // Set Won %
       gwon:     num(r["G W%"]),                                        // Games Won %
-      dur_m:    num(r["Time/Mt"]),   // Match duration (min)
+      dur_m:    durMin(r["Time/Mt"]), // Match duration "h:mm" → minuti
       dur_s:    num(r["Min/Set"]),  // Set duration (min)
       dur_pt:   num(r["Sec/Pt"]),   // Point duration (sec)
     }))

@@ -5,6 +5,8 @@
   export let player;
   export let color;
   export let otherRank;
+  export let align = 'left'; // 'left' | 'right'
+  export let lang = 'it';
 
   const dispatch = createEventDispatcher();
 
@@ -41,49 +43,45 @@
   });
 </script>
 
-<div class="selector-wrap" bind:this={container}>
-  <div class="selector-card" style="border-color: {color}25; box-shadow: 0 1px 4px rgba(0,0,0,0.05)">
-    <button
-      class="trigger"
-      on:click={() => (open = !open)}
-      style="border-color: {open ? color + '80' : color + '30'}"
-    >
-      <span class="player-name" style="color: {color}">{player.full}</span>
-      <span class="player-meta">#{player.rank} · {player.nat}</span>
-      <span class="arrow" class:rotated={open}>▼</span>
-    </button>
+<div class="selector-wrap" class:right={align === 'right'} bind:this={container}>
+  <button class="trigger" class:right={align === 'right'} on:click={() => (open = !open)}>
+    <span class="player-eyebrow" style="color: {color}">N°{player.rank} · {player.nat}</span>
+    <span class="player-line">
+      <span class="player-name">{player.full}</span>
+      <span class="arrow" class:rotated={open}>▾</span>
+    </span>
+  </button>
 
-    {#if open}
-      <div class="dropdown">
-        <div class="search-wrap">
-          <!-- svelte-ignore a11y-autofocus -->
-          <input
-            autofocus
-            bind:value={query}
-            placeholder="Cerca…"
-            class="search-input"
-          />
-        </div>
-        <div class="list">
-          {#each filtered as p (p.rank)}
-            <button
-              class="list-item"
-              class:active={p.rank === player.rank}
-              style="border-left-color: {p.rank === player.rank ? color : 'transparent'};
-                     background: {p.rank === player.rank ? color + '10' : 'transparent'}"
-              on:click={() => select(p)}
-              on:mouseenter={e => { e.currentTarget.style.background = color + '10'; }}
-              on:mouseleave={e => { e.currentTarget.style.background = p.rank === player.rank ? color + '10' : 'transparent'; }}
-            >
-              <span class="list-rank">#{p.rank}</span>
-              <span class="list-name">{p.full}</span>
-              <span class="list-nat">{p.nat}</span>
-            </button>
-          {/each}
-        </div>
+  {#if open}
+    <div class="dropdown" class:right={align === 'right'}>
+      <div class="search-wrap">
+        <!-- svelte-ignore a11y-autofocus -->
+        <input
+          autofocus
+          bind:value={query}
+          placeholder={lang === 'en' ? 'Search…' : 'Cerca…'}
+          class="search-input"
+        />
       </div>
-    {/if}
-  </div>
+      <div class="list">
+        {#each filtered as p (p.rank)}
+          <button
+            class="list-item"
+            class:active={p.rank === player.rank}
+            style="border-left-color: {p.rank === player.rank ? color : 'transparent'};
+                   background: {p.rank === player.rank ? color + '14' : 'transparent'}"
+            on:click={() => select(p)}
+            on:mouseenter={e => { e.currentTarget.style.background = color + '14'; }}
+            on:mouseleave={e => { e.currentTarget.style.background = p.rank === player.rank ? color + '14' : 'transparent'; }}
+          >
+            <span class="list-rank">N°{p.rank}</span>
+            <span class="list-name">{p.full}</span>
+            <span class="list-nat">{p.nat}</span>
+          </button>
+        {/each}
+      </div>
+    </div>
+  {/if}
 </div>
 
 <style>
@@ -92,46 +90,52 @@
     width: 100%;
   }
 
-  .selector-card {
-    background: var(--surf);
-    border-radius: 10px;
-    padding: 12px 14px;
-    border: 1.5px solid;
-    position: relative;
-  }
+  .selector-wrap.right { display: flex; justify-content: flex-end; }
 
   .trigger {
-    width: 100%;
-    background: transparent;
-    border-radius: 7px;
-    padding: 9px 12px;
-    text-align: left;
     display: flex;
-    align-items: center;
-    gap: 8px;
-    border: 1.5px solid;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1px;
+    text-align: left;
+    padding: 2px 0;
     cursor: pointer;
-    font-family: inherit;
-    transition: border-color 0.15s;
   }
+
+  .trigger.right {
+    align-items: flex-end;
+    text-align: right;
+  }
+
+  .player-eyebrow {
+    font-family: var(--serif);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .player-line {
+    display: flex;
+    align-items: baseline;
+    gap: 9px;
+  }
+
+  .trigger.right .player-line { flex-direction: row-reverse; }
 
   .player-name {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 22px;
-    font-weight: 700;
-    line-height: 1;
-  }
-
-  .player-meta {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 14px;
-    color: var(--muted);
+    font-family: var(--serif);
+    font-size: var(--fs-player, 34px);
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 0.98;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    border-bottom: 1px dotted var(--muted2);
   }
 
   .arrow {
-    margin-left: auto;
     color: var(--muted);
-    font-size: 10px;
+    font-size: 14px;
     transition: transform 0.2s;
     display: inline-block;
   }
@@ -142,17 +146,18 @@
 
   .dropdown {
     position: absolute;
-    top: calc(100% + 5px);
+    top: calc(100% + 7px);
     left: 0;
     width: max-content;
-    min-width: 100%;
-    background: var(--surf);
-    border: 1.5px solid var(--bord);
-    border-radius: 8px;
+    min-width: 280px;
+    background: var(--bg);
+    border: 1px solid var(--rule);
     z-index: 300;
     overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 10px 32px rgba(28, 26, 23, 0.14);
   }
+
+  .dropdown.right { left: auto; right: 0; }
 
   .search-wrap {
     padding: 8px;
@@ -163,16 +168,18 @@
     width: 100%;
     background: var(--surf2);
     border: 1px solid var(--bord);
-    border-radius: 5px;
     padding: 6px 10px;
+    font-family: var(--serif-text);
+    font-style: italic;
     font-size: 14px;
     outline: none;
     color: var(--txt);
-    font-family: inherit;
   }
 
+  .search-input::placeholder { color: var(--muted2); }
+
   .list {
-    max-height: 260px;
+    max-height: 280px;
     overflow-y: auto;
   }
 
@@ -181,35 +188,37 @@
     padding: 8px 14px;
     cursor: pointer;
     display: flex;
-    align-items: center;
-    gap: 8px;
+    align-items: baseline;
+    gap: 10px;
     border-left: 3px solid transparent;
     border-top: none;
     border-right: none;
-    border-bottom: none;
+    border-bottom: 1px solid var(--bord);
     font-family: inherit;
     text-align: left;
     transition: background 0.1s;
   }
 
+  .list-item:last-child { border-bottom: none; }
+
   .list-rank {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
+    font-family: var(--serif);
+    font-size: 12px;
     color: var(--muted);
-    min-width: 24px;
+    min-width: 34px;
   }
 
   .list-name {
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: var(--serif);
     font-size: 16px;
-    font-weight: 600;
+    font-weight: 500;
     color: var(--txt);
   }
 
   .list-nat {
     margin-left: auto;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
+    font-family: var(--serif);
+    font-size: 12px;
     color: var(--muted);
     padding-left: 12px;
   }

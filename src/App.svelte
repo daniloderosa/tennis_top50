@@ -3,10 +3,10 @@
   import RadarChart from './lib/RadarChart.svelte';
   import StatBars from './lib/StatBars.svelte';
   import PlayerSelector from './lib/PlayerSelector.svelte';
+  import { UI, LANG_META, getLangFromURL, setLangInURL } from './lib/i18n.js';
 
-  const C1    = '#2563eb';
-  const C2    = '#d97706';
-  const ACCENT = '#2d7a45';
+  const C1 = '#2f5d8a';
+  const C2 = '#b8722c';
 
   let p1rank = +(localStorage.getItem('atpb50_p1') || 1);
   let p2rank = +(localStorage.getItem('atpb50_p2') || 2);
@@ -15,9 +15,17 @@
     return TAB_KEYS.includes(t) ? t : TAB_KEYS[0];
   })();
 
+  let lang = getLangFromURL();
+  document.documentElement.lang = lang;
+
+  let showMeth = false;
+  let langOpen = false;
+  let langWrap;
+
+  $: t = UI[lang];
   $: p1 = PLAYERS.find(p => p.rank === p1rank) ?? PLAYERS[0];
   $: p2 = PLAYERS.find(p => p.rank === p2rank) ?? PLAYERS[1];
-  $: radarData = getTabRadarData(tab);
+  $: radarData = getTabRadarData(tab, lang);
 
   $: { localStorage.setItem('atpb50_p1', p1rank); }
   $: { localStorage.setItem('atpb50_p2', p2rank); }
@@ -26,132 +34,172 @@
   function selectP1(e) { p1rank = e.detail; }
   function selectP2(e) { p2rank = e.detail; }
 
+  function changeLang(l) {
+    lang = l;
+    setLangInURL(l);
+    document.documentElement.lang = l;
+    langOpen = false;
+  }
+
+  function onWindowMousedown(e) {
+    if (langWrap && !langWrap.contains(e.target)) langOpen = false;
+  }
+
+  function onKeydown(e) {
+    if (e.key === 'Escape') {
+      showMeth = false;
+      langOpen = false;
+    }
+  }
 </script>
 
+<svelte:window on:mousedown={onWindowMousedown} on:keydown={onKeydown} />
+
 <div class="app">
-  <!-- HEADER -->
-  <header>
-    <div class="header-title">
-      <span class="title-atp" style="color: {ACCENT}">ATP</span>
-      <span class="title-rest">BEST 50</span>
-    </div>
-    <span class="header-sub">Ultime 52 settimane</span>
-  </header>
-
   <main>
-    <!-- ROW 1: selettori + H2H -->
-    <div class="row row-selectors">
-      <PlayerSelector player={p1} color={C1} otherRank={p2rank} on:select={selectP1} />
-
-      <div class="h2h-box">
-        <span class="h2h-label">Head to Head</span>
-        <div class="h2h-scores">
-          <span class="h2h-name" style="color: {C1}">{p1.full.split(' ').at(-1).toUpperCase()}</span>
-          <div class="h2h-numbers">
-            <span class="h2h-num" style="color: {C1}">—</span>
-            <span class="h2h-dash">–</span>
-            <span class="h2h-num" style="color: {C2}">—</span>
-          </div>
-          <span class="h2h-name" style="color: {C2}">{p2.full.split(' ').at(-1).toUpperCase()}</span>
+    <!-- MASTHEAD -->
+    <header class="masthead">
+      <div class="masthead-title">{t.title}</div>
+      <div class="masthead-right">
+        <button class="meth-btn" on:click={() => (showMeth = true)}>{t.methodology}</button>
+        <div class="lang-wrap" bind:this={langWrap}>
+          <button class="lang-btn" on:click={() => (langOpen = !langOpen)}>
+            <span class="lang-flag">{LANG_META[lang].flag}</span>
+            <span>{LANG_META[lang].name}</span>
+            <span class="lang-arrow" class:rotated={langOpen}>▾</span>
+          </button>
+          {#if langOpen}
+            <div class="lang-menu">
+              {#each Object.entries(LANG_META) as [code, meta] (code)}
+                <button
+                  class="lang-item"
+                  class:active={lang === code}
+                  on:click={() => changeLang(code)}
+                >
+                  <span class="lang-flag">{meta.flag}</span>
+                  <span>{meta.name}</span>
+                </button>
+              {/each}
+            </div>
+          {/if}
         </div>
-        <span class="h2h-note">dati non disponibili</span>
       </div>
+    </header>
 
-      <PlayerSelector player={p2} color={C2} otherRank={p1rank} on:select={selectP2} />
+    <!-- ROW 1: selettori -->
+    <div class="row row-selectors">
+      <PlayerSelector player={p1} color={C1} otherRank={p2rank} align="left" {lang} on:select={selectP1} />
+      <PlayerSelector player={p2} color={C2} otherRank={p1rank} align="right" {lang} on:select={selectP2} />
     </div>
 
     <!-- ROW 2: tab -->
     <div class="row row-tabs">
       <div class="tabs">
-        {#each TAB_KEYS as t (t)}
+        {#each TAB_KEYS as tk (tk)}
           <button
             class="tab-btn"
-            class:active={tab === t}
-            style={tab === t ? `background: ${ACCENT}; color: #fff;` : ''}
-            on:click={() => (tab = t)}
-          >{t}</button>
+            class:active={tab === tk}
+            on:click={() => (tab = tk)}
+          >{t.tabs[tk]}</button>
         {/each}
       </div>
     </div>
 
     <!-- ROW 3: stat P1 | radar | stat P2 -->
     <div class="row row-main">
-      <div class="col-stats card">
-        <StatBars player={p1} color={C1} {tab} />
+      <div class="col-stats">
+        <StatBars player={p1} color={C1} {tab} {lang} align="left" />
       </div>
 
-      <div class="col-radar card radar-col">
+      <div class="col-radar">
         <RadarChart
           {p1} {p2} c1={C1} c2={C2}
           axes={radarData.axes} avgVals={radarData.avg}
           size={510}
           fsLabel={15}
+          emptyText={t.noRadar}
         />
         <div class="radar-footer">
           <div class="radar-legend">
             <svg width="22" height="6">
-              <line x1="0" y1="3" x2="22" y2="3" stroke="var(--avg)" stroke-width="2" stroke-dasharray="4 3" />
+              <line x1="0" y1="3" x2="22" y2="3" stroke="var(--avg)" stroke-width="1.4" stroke-dasharray="5 3" />
             </svg>
-            <span class="legend-label">Media Top 50</span>
+            <span class="legend-label">{t.legend}</span>
           </div>
-          <span class="radar-hint">Passa il mouse sulle etichette per i valori</span>
+          <span class="radar-hint">{t.hint}</span>
         </div>
       </div>
 
-      <div class="col-stats card">
-        <StatBars player={p2} color={C2} {tab} />
+      <div class="col-stats">
+        <StatBars player={p2} color={C2} {tab} {lang} align="right" />
       </div>
     </div>
   </main>
 
-  <!-- FOOTER -->
-  <footer>
-    <div class="footer-inner">
-      <div class="footer-title" style="color: {ACCENT}">FONTE E METODOLOGIA</div>
-      <p class="footer-text">
-        Dati basati su statistiche ATP Top 50 tratte da <strong>Tennis Abstract</strong>
-        (tennisabstract.com, Jeff Sackmann). Aggiornati all'ultima esecuzione di <code>npm run fetch-data</code>.
-      </p>
-      <p class="footer-text">
-        <strong>Radar:</strong> ogni asse è normalizzato sul range min–max del top 50.
-        Le stat con flip (es. Doppi Falli) sono invertite: raggio più lungo = prestazione migliore.
-        <strong>H2H:</strong> dati non ancora disponibili.
-      </p>
+  <!-- MODALE METODOLOGIA -->
+  {#if showMeth}
+    <!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+    <div
+      class="modal-overlay"
+      role="presentation"
+      on:mousedown={(e) => { if (e.target === e.currentTarget) showMeth = false; }}
+    >
+      <div class="modal" role="dialog" aria-modal="true" aria-label={t.methTitle}>
+        <button class="modal-close" on:click={() => (showMeth = false)} aria-label="Close">×</button>
+        <h2 class="modal-title">{t.methTitle}</h2>
+        <p class="modal-text">{@html t.methP1}</p>
+        <p class="modal-text">{@html t.methP2}</p>
+      </div>
     </div>
-  </footer>
-
+  {/if}
 </div>
 
 <style>
   :global(*) { box-sizing: border-box; margin: 0; padding: 0; }
 
   :global(:root) {
-    --bg:    #f4f7f5;
-    --surf:  #ffffff;
-    --surf2: #edf3ef;
-    --bord:  #ccddd4;
-    --accent:#2d7a45;
-    --p1:    #2563eb;
-    --p2:    #d97706;
-    --avg:   #9aada0;
-    --txt:   #1a2e20;
-    --muted: #7a9882;
-    --fs-bar-label: 17px;
+    --bg:    #f4efe6;       /* carta calda */
+    --surf:  #f4efe6;
+    --surf2: #ede6d8;
+    --bord:  #e6dfd2;       /* hairline */
+    --rule:  #ddd5c6;
+    --ink:   #1c1a17;
+    --accent:#1c1a17;
+    --p1:    #2f5d8a;
+    --p2:    #b8722c;
+    --avg:   #9a8f7a;
+    --txt:   #1c1a17;
+    --muted: #8a8170;
+    --muted2:#a89d88;
+    --label: #6f6655;
+    --serif:       'Spectral', serif;
+    --serif-text:  'Newsreader', serif;
+    --fs-bar-label: 16px;
     --fs-bar-value: 28px;
-    --fs-player:    27px;
-    --fs-tabs:      18px;
+    --fs-player:    34px;
+    --fs-tabs:      17px;
+  }
+
+  /* Schermi piccoli (es. portatili 13"): stessi rapporti, misure ridotte */
+  @media (max-width: 1500px) {
+    :global(:root) {
+      --fs-bar-label: 14px;
+      --fs-bar-value: 23px;
+      --fs-player:    28px;
+      --fs-tabs:      15px;
+    }
   }
 
   :global(html, body) {
     min-height: 100%;
     background: var(--bg);
     color: var(--txt);
-    font-family: 'Barlow', sans-serif;
+    font-family: var(--serif-text);
     font-size: 16px;
   }
 
   :global(::-webkit-scrollbar) { width: 5px; background: var(--surf2); }
-  :global(::-webkit-scrollbar-thumb) { background: var(--bord); border-radius: 3px; }
+  :global(::-webkit-scrollbar-thumb) { background: var(--rule); border-radius: 3px; }
   :global(button) { cursor: pointer; border: none; background: transparent; color: inherit; font-family: inherit; }
   :global(input)  { font-family: inherit; }
 
@@ -161,106 +209,126 @@
     flex-direction: column;
   }
 
-  /* ── HEADER ── */
-  header {
-    border-bottom: 1px solid var(--bord);
-    padding: 0 20px;
-    display: flex;
-    align-items: center;
-    height: 54px;
-    background: var(--surf);
-    flex-shrink: 0;
-    gap: 12px;
-    white-space: nowrap;
-  }
-
-  .header-title {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: 0.1em;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-  }
-
-  .title-rest { color: var(--txt); }
-
-  .header-sub {
-    font-family: 'Barlow', sans-serif;
-    font-size: 13px;
-    color: var(--muted);
-  }
-
   /* ── MAIN ── */
   main {
     flex: 1;
     max-width: 1660px;
     width: 100%;
     margin: 0 auto;
-    padding: 12px 0;
+    padding: 26px 36px 20px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 18px;
     min-height: 0;
   }
+
+  @media (max-width: 1500px) {
+    main { padding: 18px 28px 14px; gap: 14px; }
+  }
+
+  /* ── MASTHEAD ── */
+  .masthead {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 12px;
+    flex-shrink: 0;
+  }
+
+  .masthead-title {
+    font-family: var(--serif);
+    font-size: 27px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  @media (max-width: 1500px) {
+    .masthead-title { font-size: 23px; }
+  }
+
+  .masthead-right {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+  }
+
+  .meth-btn {
+    font-family: var(--serif);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--label);
+    padding: 6px 0;
+    border-bottom: 1px dotted var(--muted2);
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .meth-btn:hover { color: var(--ink); border-bottom-color: var(--ink); }
+
+  .lang-wrap { position: relative; }
+
+  .lang-btn {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--serif);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--label);
+    padding: 5px 10px;
+    border: 1px solid var(--rule);
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  .lang-btn:hover { color: var(--ink); border-color: var(--muted2); }
+
+  .lang-flag { font-size: 14px; line-height: 1; }
+
+  .lang-arrow {
+    font-size: 10px;
+    color: var(--muted);
+    transition: transform 0.2s;
+  }
+
+  .lang-arrow.rotated { transform: rotate(180deg); }
+
+  .lang-menu {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    box-shadow: 0 10px 32px rgba(28, 26, 23, 0.14);
+    z-index: 400;
+  }
+
+  .lang-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: var(--serif);
+    font-size: 13px;
+    color: var(--label);
+    padding: 7px 12px;
+    white-space: nowrap;
+    text-align: left;
+  }
+
+  .lang-item:hover { background: var(--surf2); color: var(--ink); }
+  .lang-item.active { color: var(--ink); font-weight: 600; }
+  .lang-item + .lang-item { border-top: 1px solid var(--bord); }
 
   .row { display: grid; gap: 10px; }
 
   .row-selectors {
-    grid-template-columns: 1fr 320px 1fr;
-    align-items: stretch;
-    flex-shrink: 0;
-  }
-
-  .h2h-box {
-    background: var(--surf);
-    border-radius: 10px;
-    padding: 12px 16px;
-    border: 1px solid var(--bord);
-    display: flex;
-    flex-direction: column;
+    grid-template-columns: 1fr 1fr;
     align-items: center;
-    justify-content: center;
-    gap: 4px;
-  }
-
-  .h2h-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-
-  .h2h-scores { display: flex; align-items: center; gap: 10px; }
-
-  .h2h-name {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-  }
-
-  .h2h-numbers { display: flex; align-items: center; gap: 6px; }
-
-  .h2h-num {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 34px;
-    font-weight: 800;
-    line-height: 1;
-  }
-
-  .h2h-dash {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 20px;
-    color: var(--muted);
-  }
-
-  .h2h-note {
-    font-family: 'Barlow', sans-serif;
-    font-size: 11px;
-    color: var(--muted);
-    font-style: italic;
+    gap: 24px;
+    flex-shrink: 0;
   }
 
   .row-tabs {
@@ -270,131 +338,158 @@
 
   .tabs {
     display: flex;
-    gap: 3px;
+    gap: 0;
     justify-content: center;
-    background: var(--surf);
-    border-radius: 10px;
-    padding: 6px;
-    border: 1px solid var(--bord);
+    border-bottom: 1px solid var(--rule);
   }
 
   .tab-btn {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: var(--fs-tabs, 18px);
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    padding: 7px 28px;
-    border-radius: 7px;
-    color: var(--muted);
-    transition: background 0.15s, color 0.15s;
+    font-family: var(--serif);
+    font-size: var(--fs-tabs, 17px);
+    font-weight: 400;
+    font-style: italic;
+    color: var(--muted2);
+    padding: 8px 30px;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.15s;
   }
 
-  .tab-btn:not(.active):hover {
-    background: var(--surf2);
-    color: var(--txt);
+  @media (max-width: 1500px) {
+    .tab-btn { padding: 7px 22px; }
+  }
+
+  .tab-btn:not(.active):hover { color: var(--txt); }
+
+  .tab-btn.active {
+    font-weight: 600;
+    font-style: normal;
+    color: var(--ink);
+    border-bottom-color: var(--ink);
   }
 
   /* Row 3: fills remaining height */
   .row-main {
     grid-template-columns: 330px 1fr 330px;
+    gap: 30px;
     align-items: stretch;
     flex: 1;
     min-height: 0;
   }
 
-  .card {
-    background: var(--surf);
-    border-radius: 10px;
-    border: 1px solid var(--bord);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  @media (max-width: 1500px) {
+    .row-main { grid-template-columns: 280px 1fr 280px; gap: 22px; }
   }
 
   .col-stats {
-    padding: 14px 16px;
     display: flex;
     flex-direction: column;
     overflow-y: auto;
   }
 
+  /* Il radar (margin auto) si centra nello spazio libero; la legenda resta
+     in fondo. min-height garantisce che i valori hover dell'asse in basso
+     (che sbordano dal box SVG) non tocchino la legenda. */
   .col-radar {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    padding: 24px 12px 16px;
-    position: relative;
+    padding: 12px 12px 8px;
+    min-height: 700px;
   }
 
-  .radar-col { min-height: 480px; }
+  @media (max-width: 1500px) {
+    .col-radar { min-height: 590px; }
+    .col-radar :global(.radar-svg) { width: 430px; height: 430px; }
+  }
 
   .radar-footer {
-    position: absolute;
-    bottom: 14px;
-    right: 16px;
+    margin-top: 12px;
     display: flex;
     flex-direction: column;
-    align-items: flex-end;
-    gap: 4px;
+    align-items: center;
+    gap: 3px;
+    flex-shrink: 0;
   }
 
   .radar-legend {
     display: flex;
     align-items: center;
-    gap: 7px;
+    gap: 8px;
   }
 
   .legend-label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 12px;
+    font-family: var(--serif-text);
+    font-size: 13px;
+    font-style: italic;
     color: var(--muted);
-    font-weight: 600;
   }
 
   .radar-hint {
-    font-family: 'Barlow', sans-serif;
+    font-family: var(--serif-text);
     font-size: 11px;
-    color: var(--muted);
-    text-align: right;
+    font-style: italic;
+    color: var(--muted2);
   }
 
-  /* ── FOOTER ── */
-  footer {
-    background: var(--surf2);
-    border-top: 1px solid var(--bord);
-    padding: 20px 28px;
-    flex-shrink: 0;
-  }
-
-  .footer-inner {
-    max-width: 1080px;
-    margin: 0 auto;
+  /* ── MODALE ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(28, 26, 23, 0.35);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    padding: 24px;
   }
 
-  .footer-title {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    margin-bottom: 3px;
+  .modal {
+    position: relative;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    box-shadow: 0 24px 64px rgba(28, 26, 23, 0.3);
+    max-width: 580px;
+    width: 100%;
+    padding: 30px 36px 28px;
   }
 
-  .footer-text {
-    font-family: 'Barlow', sans-serif;
-    font-size: 13px;
+  .modal-close {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    font-family: var(--serif);
+    font-size: 26px;
+    line-height: 1;
     color: var(--muted);
-    line-height: 1.6;
+    padding: 4px;
+    transition: color 0.15s;
   }
 
-  .footer-text strong { color: var(--txt); }
-  .footer-text code {
-    font-size: 12px;
-    background: var(--bord);
-    padding: 1px 5px;
-    border-radius: 3px;
-    color: var(--txt);
+  .modal-close:hover { color: var(--ink); }
+
+  .modal-title {
+    font-family: var(--serif);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--muted);
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 10px;
+    margin-bottom: 14px;
   }
 
+  .modal-text {
+    font-family: var(--serif-text);
+    font-size: 15px;
+    color: var(--label);
+    line-height: 1.65;
+  }
+
+  .modal-text + .modal-text { margin-top: 10px; }
+
+  .modal-text :global(strong) { color: var(--txt); font-weight: 500; }
 </style>
