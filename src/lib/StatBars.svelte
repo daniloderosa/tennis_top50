@@ -71,14 +71,25 @@
     border-bottom: 1px solid var(--bord);
   }
 
+  /* su 13" il tab con più righe (Palle Break) decide l'altezza pagina:
+     righe più compatte = niente scrollbar */
+  @media (max-width: 1500px) {
+    .stat-row { padding: 8px 0 9px; }
+  }
+
   .stat-meta {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    /* il valore si aggancia all'ULTIMA riga del label: nei label su due
+       righe resta appena sopra la barra come in tutti gli altri */
+    align-items: last baseline;
     gap: 14px;
   }
 
   .stat-meta.reversed { flex-direction: row-reverse; }
+
+  /* label su più righe: il testo segue l'allineamento della colonna */
+  .stat-meta.reversed .stat-label { text-align: right; }
 
   .stat-label {
     font-family: var(--serif-text);

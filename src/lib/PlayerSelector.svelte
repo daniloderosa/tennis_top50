@@ -8,12 +8,27 @@
   export let otherRank;
   export let align = 'left'; // 'left' | 'right'
   export let lang = 'it';
+  export let compact = false; // variante mobile: nome più piccolo, a capo
+  export let dropAlign = null; // 'left' | 'right' | 'center' — default = align
 
   const dispatch = createEventDispatcher();
 
   let open = false;
   let query = '';
   let container;
+  let listMaxH = 280;
+
+  $: da = dropAlign ?? align;
+
+  function toggleOpen() {
+    open = !open;
+    if (open && container) {
+      // la lista si accorcia per restare interamente dentro la finestra
+      // (~80px = campo di ricerca + bordi + margine dal fondo)
+      const r = container.getBoundingClientRect();
+      listMaxH = Math.max(160, Math.min(280, window.innerHeight - r.bottom - 80));
+    }
+  }
 
   $: filtered = PLAYERS.filter(p => {
     const q = query.toLowerCase();
@@ -44,8 +59,8 @@
   });
 </script>
 
-<div class="selector-wrap" class:right={align === 'right'} bind:this={container}>
-  <button class="trigger" class:right={align === 'right'} on:click={() => (open = !open)}>
+<div class="selector-wrap" class:right={align === 'right'} class:compact bind:this={container}>
+  <button class="trigger" class:right={align === 'right'} on:click={toggleOpen}>
     <span class="player-eyebrow" style="color: {color}">{player ? `N°${player.rank} · ${player.nat}` : ' '}</span>
     <span class="player-line">
       <span class="player-name" class:placeholder={!player}>{player ? player.full : UI[lang].selectPlayer}</span>
@@ -54,7 +69,7 @@
   </button>
 
   {#if open}
-    <div class="dropdown" class:right={align === 'right'}>
+    <div class="dropdown" class:right={da === 'right'} class:center={da === 'center'}>
       <div class="search-wrap">
         <!-- svelte-ignore a11y-autofocus -->
         <input
@@ -64,7 +79,7 @@
           class="search-input"
         />
       </div>
-      <div class="list">
+      <div class="list" style="max-height: {listMaxH}px">
         {#each filtered as p (p.rank)}
           <button
             class="list-item"
@@ -141,6 +156,16 @@
     font-style: italic;
   }
 
+  /* variante mobile */
+  .compact .player-eyebrow { font-size: 11px; }
+  .compact .player-name {
+    font-size: 21px;
+    white-space: normal;
+    line-height: 1.1;
+  }
+  .compact .arrow { font-size: 13px; }
+  .compact .dropdown { min-width: 250px; max-width: 84vw; }
+
   .arrow {
     color: var(--muted);
     font-size: 18px;
@@ -166,6 +191,14 @@
   }
 
   .dropdown.right { left: auto; right: 0; }
+
+  /* centrato rispetto al trigger (landing): non sborda mai ai lati */
+  .dropdown.center {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    max-width: 92vw;
+  }
 
   .search-wrap {
     padding: 8px;

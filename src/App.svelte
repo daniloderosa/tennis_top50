@@ -2,6 +2,7 @@
   import { PLAYERS, TAB_KEYS, getTabRadarData } from './lib/data.js';
   import RadarChart from './lib/RadarChart.svelte';
   import StatBars from './lib/StatBars.svelte';
+  import StatRowsMobile from './lib/StatRowsMobile.svelte';
   import PlayerSelector from './lib/PlayerSelector.svelte';
   import { UI, LANG_META, getLangFromURL, setLangInURL } from './lib/i18n.js';
 
@@ -40,6 +41,11 @@
   let showMeth = false;
   let langOpen = false;
   let langWrap;
+
+  // layout mobile (modello V1 "Editorial" da Claude Design) sotto i 760px
+  const mqMobile = window.matchMedia('(max-width: 760px)');
+  let isMobile = mqMobile.matches;
+  mqMobile.addEventListener('change', (e) => (isMobile = e.matches));
 
   $: t = UI[lang];
   $: p1 = p1rank == null ? null : (PLAYERS.find(p => p.rank === p1rank) ?? null);
@@ -87,7 +93,11 @@
   }
 </script>
 
-<svelte:window on:mousedown={onWindowMousedown} on:keydown={onKeydown} />
+<svelte:window
+  on:mousedown={onWindowMousedown}
+  on:keydown={onKeydown}
+  on:resize={() => (isMobile = mqMobile.matches)}
+/>
 
 <div class="app">
   <main>
@@ -95,14 +105,19 @@
     <header class="masthead" class:bare={landing}>
       {#if !landing}
         <div class="masthead-title">
-          <button class="title-link" on:click={goHome}>{t.titleMain}</button><span class="masthead-title-sub">{t.titleSub}</span>
+          {#if isMobile}
+            <div class="m-kicker">{t.mobileKicker}</div>
+            <button class="title-link m-title" on:click={goHome}>ATP Top 50</button>
+          {:else}
+            <button class="title-link" on:click={goHome}>{t.titleMain}</button><span class="masthead-title-sub">{t.titleSub}</span>
+          {/if}
         </div>
       {/if}
       <div class="masthead-right">
         <div class="lang-wrap" bind:this={langWrap}>
           <button class="lang-btn" on:click={() => (langOpen = !langOpen)}>
             <span class="lang-flag">{LANG_META[lang].flag}</span>
-            <span>{LANG_META[lang].name}</span>
+            <span class="lang-name">{LANG_META[lang].name}</span>
             <span class="lang-arrow" class:rotated={langOpen}>▾</span>
           </button>
           {#if langOpen}
@@ -120,7 +135,7 @@
             </div>
           {/if}
         </div>
-        {#if !landing}
+        {#if !landing && !isMobile}
           <button class="meth-btn" on:click={() => (showMeth = true)}>{t.methodology}</button>
         {/if}
       </div>
@@ -133,15 +148,27 @@
         <p class="welcome-sub">{t.welcomeSub}</p>
         <!-- un solo selettore: la prima scelta è automaticamente P1 -->
         <div class="welcome-selectors">
-          <PlayerSelector player={p1} color={C1} otherRank={p2rank} align="left" {lang} on:select={selectP1} />
+          <PlayerSelector player={p1} color={C1} otherRank={p2rank} align="left" dropAlign="center" {lang} on:select={selectP1} />
         </div>
       </div>
     {:else}
       <!-- ROW 1: selettori -->
-      <div class="row row-selectors">
-        <PlayerSelector player={p1} color={C1} otherRank={p2rank} align="left" {lang} on:select={selectP1} />
-        <PlayerSelector player={p2} color={C2} otherRank={p1rank} align="right" {lang} on:select={selectP2} />
-      </div>
+      {#if isMobile}
+        <div class="m-players">
+          <div class="m-player">
+            <PlayerSelector compact player={p1} color={C1} otherRank={p2rank} align="left" {lang} on:select={selectP1} />
+          </div>
+          <div class="m-vdiv"></div>
+          <div class="m-player">
+            <PlayerSelector compact player={p2} color={C2} otherRank={p1rank} align="right" {lang} on:select={selectP2} />
+          </div>
+        </div>
+      {:else}
+        <div class="row row-selectors">
+          <PlayerSelector player={p1} color={C1} otherRank={p2rank} align="left" {lang} on:select={selectP1} />
+          <PlayerSelector player={p2} color={C2} otherRank={p1rank} align="right" {lang} on:select={selectP2} />
+        </div>
+      {/if}
 
       <!-- ROW 2: tab -->
       <div class="row row-tabs">
@@ -156,18 +183,15 @@
         </div>
       </div>
 
-      <!-- ROW 3: stat P1 | radar | stat P2 -->
-      <div class="row row-main">
-        <div class="col-stats">
-          <StatBars player={p1} color={C1} {tab} {lang} align="left" />
-        </div>
-
-        <div class="col-radar">
+      {#if isMobile}
+        <!-- MOBILE: radar centrale + righe stat a specchio -->
+        <div class="m-radar">
           <RadarChart
             {p1} {p2} c1={C1} c2={C2}
             axes={radarData.axes} avgVals={radarData.avg}
-            size={510}
+            size={320}
             fsLabel={15}
+            labelDist={184}
             emptyText={t.noRadar}
             avgLabel={t.avgShort}
           />
@@ -178,14 +202,45 @@
               </svg>
               <span class="legend-label">{t.legend}</span>
             </div>
-            <span class="radar-hint">{t.hint}</span>
+            <span class="radar-hint">{t.hintTap}</span>
           </div>
         </div>
 
-        <div class="col-stats">
-          <StatBars player={p2} color={C2} {tab} {lang} align="right" />
+        <StatRowsMobile {p1} {p2} c1={C1} c2={C2} {tab} {lang} />
+
+        <button class="m-meth" on:click={() => (showMeth = true)}>{t.methodology}</button>
+      {:else}
+        <!-- ROW 3: stat P1 | radar | stat P2 -->
+        <div class="row row-main">
+          <div class="col-stats">
+            <StatBars player={p1} color={C1} {tab} {lang} align="left" />
+          </div>
+
+          <div class="col-radar">
+            <RadarChart
+              {p1} {p2} c1={C1} c2={C2}
+              axes={radarData.axes} avgVals={radarData.avg}
+              size={510}
+              fsLabel={15}
+              emptyText={t.noRadar}
+              avgLabel={t.avgShort}
+            />
+            <div class="radar-footer">
+              <div class="radar-legend">
+                <svg width="22" height="6">
+                  <line x1="0" y1="3" x2="22" y2="3" stroke="var(--avg)" stroke-width="1.4" stroke-dasharray="5 3" />
+                </svg>
+                <span class="legend-label">{t.legend}</span>
+              </div>
+              <span class="radar-hint">{t.hint}</span>
+            </div>
+          </div>
+
+          <div class="col-stats">
+            <StatBars player={p2} color={C2} {tab} {lang} align="right" />
+          </div>
         </div>
-      </div>
+      {/if}
     {/if}
   </main>
 
@@ -230,8 +285,8 @@
     --serif-text:  'Lora', serif;
     --fs-bar-label: 18px;
     --fs-bar-value: 28px;
-    --fs-player:    34px;
-    --fs-tabs:      19px;
+    --fs-player:    29px;
+    --fs-tabs:      18px;
   }
 
   /* Schermi piccoli (es. portatili 13"): stessi rapporti, misure ridotte */
@@ -239,8 +294,8 @@
     :global(:root) {
       --fs-bar-label: 16px;
       --fs-bar-value: 23px;
-      --fs-player:    28px;
-      --fs-tabs:      17px;
+      --fs-player:    25px;
+      --fs-tabs:      16px;
     }
   }
 
@@ -455,23 +510,19 @@
 
   .row { display: grid; gap: 10px; }
 
-  /* margin-top calibrato per centrare il nome nella fascia filetto nero →
-     linea grigia: spazio sopra il nome ≈ spazio sotto + altezza tab.
-     (è il minimo possibile: meno di così il nome non può essere centrato) */
+  /* fascia nomi+tab ridotta al minimo per far stare la pagina su 13"
+     senza scrollbar: a questa altezza il nome non può essere centrato
+     esattamente (servirebbe sopra almeno l'altezza dei tab), il bianco
+     è distribuito attorno al nome */
   .row-selectors {
     grid-template-columns: 1fr 1fr;
     align-items: center;
     gap: 24px;
-    margin-top: 25px;
     flex-shrink: 0;
   }
 
-  @media (max-width: 1500px) {
-    .row-selectors { margin-top: 21px; }
-  }
-
   /* avvicina i tab al nome (riduce l'altezza totale della sezione) */
-  .row-tabs { margin-top: -6px; }
+  .row-tabs { margin-top: -4px; }
 
   .row-tabs {
     grid-template-columns: 1fr;
@@ -490,7 +541,7 @@
     font-size: var(--fs-tabs, 19px);
     font-weight: 400;
     color: var(--muted2);
-    padding: 2px 34px 4px;
+    padding: 1px 34px 3px;
     border-bottom: 2px solid transparent;
     margin-bottom: -1px;
     transition: color 0.15s;
@@ -538,11 +589,11 @@
     flex-direction: column;
     align-items: center;
     padding: 12px 12px 8px;
-    min-height: 720px;
+    min-height: 745px;
   }
 
   @media (max-width: 1500px) {
-    .col-radar { min-height: 620px; }
+    .col-radar { min-height: 635px; }
     .col-radar :global(.radar-svg) { width: 430px; height: 430px; }
   }
 
@@ -635,4 +686,104 @@
   .modal-text + .modal-text { margin-top: 10px; }
 
   .modal-text :global(strong) { color: var(--txt); font-weight: 500; }
+
+  /* ── MOBILE (modello V1 "Editorial") ── */
+  @media (max-width: 760px) {
+    main { padding: 14px 18px 32px; gap: 0; }
+
+    .masthead { align-items: flex-start; padding-bottom: 10px; }
+    .masthead.bare { padding-bottom: 0; }
+
+    .m-kicker {
+      font-family: var(--serif);
+      font-size: 10px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .m-title {
+      display: block;
+      font-family: var(--serif);
+      font-size: 30px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.15;
+      margin-top: 2px;
+    }
+
+    .lang-btn { padding: 4px 8px; font-size: 12px; }
+    .lang-name { display: none; }
+
+    /* due selettori affiancati divisi da hairline verticale */
+    .m-players {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      margin-top: 15px;
+    }
+
+    .m-player { flex: 1; min-width: 0; }
+
+    .m-vdiv {
+      width: 1px;
+      align-self: stretch;
+      background: var(--bord);
+      flex-shrink: 0;
+    }
+
+    /* tab scrollabili, centrati quando ci stanno */
+    .row-tabs { margin-top: 13px; }
+
+    .tabs {
+      justify-content: flex-start;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .tabs::-webkit-scrollbar { display: none; }
+
+    .tab-btn {
+      padding: 8px 0 9px;
+      margin: 0 12px -1px;
+      font-size: 16px;
+    }
+
+    .tab-btn:first-child { margin-left: auto; }
+    .tab-btn:last-child { margin-right: auto; }
+
+    /* padding-top e margine legenda assorbono i valori tap dei label in
+       alto/in basso, che sbordano dal box SVG: niente sovrapposizioni */
+    .m-radar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 42px 0 4px;
+    }
+
+    .m-radar :global(.radar-svg) { max-width: 100%; height: auto; }
+
+    .m-radar .radar-footer { margin-top: 50px; }
+    .legend-label { font-size: 13px; }
+    .radar-hint { font-size: 12px; }
+
+    .m-meth {
+      display: block;
+      margin: 28px auto 0;
+      font-family: var(--serif);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--label);
+      border-bottom: 1px dotted var(--muted2);
+      padding: 4px 0;
+    }
+
+    .welcome-title { font-size: 30px; }
+    .welcome-sub { font-size: 16px; }
+    .welcome-selectors { margin-top: 30px; }
+
+    .modal { padding: 24px 22px 22px; }
+  }
 </style>

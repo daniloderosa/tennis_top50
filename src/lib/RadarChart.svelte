@@ -11,14 +11,21 @@
   export let fsLabel = 11;  // font size for axis labels (in SVG user units)
   export let emptyText = 'Statistiche insufficienti per il grafico radar';
   export let avgLabel = 'Media'; // etichetta della media nei valori hover
+  export let labelDist = null;   // distanza label dal centro (user units); default R+52
 
   // Internal coordinate system is always 420×420
   const SZ  = 420;
   const CX  = SZ / 2;
   const CY  = SZ / 2;
   const R   = 148;
-  const LABEL_DIST = R + 52;
   const LINE_H = 20;
+
+  // Su dispositivi senza hover (touch) i valori si aprono con un tap
+  const hasHover = typeof window === 'undefined'
+    ? true
+    : window.matchMedia('(hover: hover)').matches;
+
+  $: LABEL_DIST = labelDist ?? R + 52;
 
   const rings = [0.25, 0.5, 0.75, 1];
 
@@ -138,9 +145,11 @@
     {@const isH  = hovered === i}
     {@const anch = anchor(a)}
     {@const dir  = valDir(a)}
+    <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
     <g
-      on:mouseenter={() => (hovered = i)}
-      on:mouseleave={() => (hovered = null)}
+      on:mouseenter={() => { if (hasHover) hovered = i; }}
+      on:mouseleave={() => { if (hasHover) hovered = null; }}
+      on:click={() => { if (!hasHover) hovered = hovered === i ? null : i; }}
       style="cursor: default;"
       role="img"
       aria-label={ax.short ?? ax.label}
