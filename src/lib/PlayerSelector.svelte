@@ -219,6 +219,12 @@
 
   .search-input::placeholder { color: var(--muted2); }
 
+  /* iOS Safari zooma la pagina se un input col focus ha font < 16px:
+     su mobile il campo di ricerca deve stare ad almeno 16px */
+  @media (max-width: 760px) {
+    .search-input { font-size: 16px; }
+  }
+
   .list {
     max-height: 280px;
     overflow-y: auto;
