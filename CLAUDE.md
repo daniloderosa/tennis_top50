@@ -1,6 +1,6 @@
 # ATP Best 50 — Dashboard statistiche tennis
 
-Dashboard di confronto statistico tra i top 50 giocatori ATP (ultime 52 settimane), dati da Tennis Abstract.
+Dashboard di confronto statistico tra i top 100 giocatori ATP (ultime 52 settimane), dati da Tennis Abstract. La **media di riferimento sul radar resta però la top 50** (`TOP50 = PLAYERS.filter(rank<=50)` in data.js); i range di normalizzazione di radar e barre usano invece tutti i 100 (così i giocatori dal 51° in giù non si schiacciano al bordo). Titolo UI "ATP Top 100"; il repo/cartella resta `tennis_top50`.
 
 ## Stack
 

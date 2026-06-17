@@ -2,6 +2,10 @@ import rawPlayers from '../data/players.json';
 
 export const PLAYERS = rawPlayers;
 
+// La lista selezionabile arriva fino alla 100, ma la media di riferimento
+// sul radar resta SEMPRE quella dei primi 50 del ranking (scelta utente).
+const TOP50 = PLAYERS.filter(p => p.rank <= 50);
+
 // Sezioni barre — nessun min/max hardcoded: vengono calcolati da STAT_RANGES.
 // Ogni stat ha label/short in italiano e `en: { label, short }` per l'inglese.
 // `flip: true` = valore basso è meglio (usato SOLO dal radar; le barre
@@ -66,8 +70,9 @@ export function statLabel(stat, lang) {
   return lang === 'en' && stat.en ? stat.en.label : stat.label;
 }
 
-// Min/max calcolati dai dati reali del top-50 per ogni stat non-%
-// Usati da StatBars (barre) e getTabRadarData (radar)
+// Min/max calcolati su TUTTA la lista (top 100) per ogni stat non-%, così
+// anche i giocatori dal 51° in giù si normalizzano senza essere schiacciati
+// al bordo. Usati da StatBars (barre) e getTabRadarData (radar).
 export const STAT_RANGES = (() => {
   const ranges = {};
   for (const stats of Object.values(STAT_TABS)) {
@@ -93,7 +98,7 @@ export function getTabRadarData(tabKey, lang = 'it') {
   const axes = stats.map(stat => {
     let min, max;
     if (stat.unit === '%') {
-      // Per le % usiamo il range reale del top-50, non 0-100
+      // Per le % usiamo il range reale di tutta la lista, non 0-100
       const vals = PLAYERS.map(p => p[stat.key]).filter(v => v != null);
       if (vals.length === 0) return null;
       min = Math.min(...vals);
@@ -109,8 +114,9 @@ export function getTabRadarData(tabKey, lang = 'it') {
     return { key: stat.key, label: loc.label, short: loc.short, unit: stat.unit ?? '', min, max, flip: stat.flip ?? false };
   }).filter(Boolean);
 
+  // La media tratteggiata è SEMPRE quella dei primi 50 (non dei 100)
   const avg = axes.map(ax => {
-    const vals = PLAYERS.map(p => p[ax.key]).filter(v => v != null);
+    const vals = TOP50.map(p => p[ax.key]).filter(v => v != null);
     return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
   });
 

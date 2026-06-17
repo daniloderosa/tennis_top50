@@ -107,7 +107,7 @@
         <div class="masthead-title">
           {#if isMobile}
             <div class="m-kicker">{t.mobileKicker}</div>
-            <button class="title-link m-title" on:click={goHome}>ATP Top 50</button>
+            <button class="title-link m-title" on:click={goHome}>ATP Top 100</button>
           {:else}
             <button class="title-link" on:click={goHome}>{t.titleMain}</button><span class="masthead-title-sub">{t.titleSub}</span>
           {/if}

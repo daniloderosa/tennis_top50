@@ -20,17 +20,17 @@ export function setLangInURL(lang) {
 
 export const UI = {
   en: {
-    titleMain: "ATP Top 50 - Player Performance",
+    titleMain: "ATP Top 100 - Player Performance",
     titleSub: "Last 52 weeks",
     avgShort: "Avg",
-    welcomeTitle: "Welcome to the ATP Top 50 Player Performance",
+    welcomeTitle: "Welcome to the ATP Top 100 Player Performance",
     welcomeSub: "Select a player to begin",
     methodology: "Methodology",
     methTitle: "Source & methodology",
     methP1:
-      "Data based on ATP Top 50 statistics from <strong>Tennis Abstract</strong> (tennisabstract.com, Jeff Sackmann), covering the last 52 weeks. Data is updated periodically.",
+      "Data based on ATP Top 100 statistics from <strong>Tennis Abstract</strong> (tennisabstract.com, Jeff Sackmann), covering the last 52 weeks. Data is updated periodically.",
     methP2:
-      "<strong>Radar:</strong> each axis is normalized to the min-max range of the top 50. For stats where a lower value is better (e.g. double faults) the scale is inverted: a longer radius always means a better performance.",
+      "<strong>Radar:</strong> each axis is normalized to the min-max range of the top 100; the dashed line marks the average of the top 50. For stats where a lower value is better (e.g. double faults) the scale is inverted: a longer radius always means a better performance.",
     legend: "average of the top 50 players",
     hint: "hover the labels to see the values",
     hintTap: "tap a label to see the values",
@@ -46,17 +46,17 @@ export const UI = {
     },
   },
   it: {
-    titleMain: "ATP Top 50 - Performance Giocatori",
+    titleMain: "ATP Top 100 - Performance Giocatori",
     titleSub: "Ultime 52 settimane",
     avgShort: "Media",
-    welcomeTitle: "Benvenuto in ATP Top 50 - Performance Giocatori",
+    welcomeTitle: "Benvenuto in ATP Top 100 - Performance Giocatori",
     welcomeSub: "Seleziona un giocatore per iniziare",
     methodology: "Metodologia",
     methTitle: "Fonte e metodologia",
     methP1:
-      "Dati basati su statistiche ATP Top 50 tratte da <strong>Tennis Abstract</strong> (tennisabstract.com, Jeff Sackmann), riferite alle ultime 52 settimane. I dati vengono aggiornati periodicamente.",
+      "Dati basati su statistiche ATP Top 100 tratte da <strong>Tennis Abstract</strong> (tennisabstract.com, Jeff Sackmann), riferite alle ultime 52 settimane. I dati vengono aggiornati periodicamente.",
     methP2:
-      "<strong>Radar:</strong> ogni asse è normalizzato sul range min-max del top 50. Per le statistiche in cui un valore basso è meglio (es. doppi falli) la scala è invertita: raggio più lungo = prestazione migliore.",
+      "<strong>Radar:</strong> ogni asse è normalizzato sul range min-max del top 100; la linea tratteggiata indica la media dei primi 50. Per le statistiche in cui un valore basso è meglio (es. doppi falli) la scala è invertita: raggio più lungo = prestazione migliore.",
     legend: "media dei primi 50 del ranking",
     hint: "passa il mouse sulle etichette per i valori",
     hintTap: "tocca un'etichetta per vedere i valori",
