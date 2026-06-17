@@ -29,7 +29,7 @@ scripts/fetch_data.mjs    # fetch da Google Sheets (gviz/tq CSV)
 ## Pipeline dati
 
 1. Google Apps Script (lato utente) prende i dati da Tennis Abstract e li mette in un Google Sheet
-2. `npm run fetch-data` legge il foglio via endpoint gviz/tq CSV e genera `src/data/players.json`
+2. `npm run fetch-data` legge il foglio via endpoint gviz/tq CSV e genera `src/data/players.json` (formato `{ updated: "YYYY-MM-DD", players: [...] }`: `updated` = giorno locale del fetch, mostrato nella metodologia come "Dati aggiornati al …" via `DATA_UPDATED` in data.js + `Intl.DateTimeFormat`)
 3. Tennis Abstract blocca gli IP cloud → il fetch va eseguito **dalla macchina locale dell'utente**
 
 Mapping colonne particolari: `MdOppRk`→opp_rnk_med, `MnOppRk`→opp_rnk_avg, `Time/Mt`→dur_m, `Min/Set`→dur_s, `Sec/Pt`→dur_pt.

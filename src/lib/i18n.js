@@ -27,8 +27,9 @@ export const UI = {
     welcomeSub: "Select a player to begin",
     methodology: "Methodology",
     methTitle: "Source & methodology",
+    methUpdated: "Data updated on",
     methP1:
-      "Data based on ATP Top 100 statistics from <strong>Tennis Abstract</strong> (tennisabstract.com, Jeff Sackmann), covering the last 52 weeks. Data is updated periodically.",
+      "Data based on ATP Top 100 statistics from <strong>Tennis Abstract</strong> (tennisabstract.com, Jeff Sackmann), covering the last 52 weeks. Data is updated every Monday.",
     methP2:
       "<strong>Radar:</strong> each axis is normalized to the min-max range of the top 100; the dashed line marks the average of the top 50. For stats where a lower value is better (e.g. double faults) the scale is inverted: a longer radius always means a better performance.",
     legend: "average of the top 50 players",
@@ -53,8 +54,9 @@ export const UI = {
     welcomeSub: "Seleziona un giocatore per iniziare",
     methodology: "Metodologia",
     methTitle: "Fonte e metodologia",
+    methUpdated: "Dati aggiornati al",
     methP1:
-      "Dati basati su statistiche ATP Top 100 tratte da <strong>Tennis Abstract</strong> (tennisabstract.com, Jeff Sackmann), riferite alle ultime 52 settimane. I dati vengono aggiornati periodicamente.",
+      "Dati basati su statistiche ATP Top 100 tratte da <strong>Tennis Abstract</strong> (tennisabstract.com, Jeff Sackmann), riferite alle ultime 52 settimane. I dati vengono aggiornati ogni lunedì.",
     methP2:
       "<strong>Radar:</strong> ogni asse è normalizzato sul range min-max del top 100; la linea tratteggiata indica la media dei primi 50. Per le statistiche in cui un valore basso è meglio (es. doppi falli) la scala è invertita: raggio più lungo = prestazione migliore.",
     legend: "media dei primi 50 del ranking",

@@ -1,5 +1,5 @@
 <script>
-  import { PLAYERS, TAB_KEYS, getTabRadarData } from './lib/data.js';
+  import { PLAYERS, TAB_KEYS, getTabRadarData, DATA_UPDATED } from './lib/data.js';
   import RadarChart from './lib/RadarChart.svelte';
   import StatBars from './lib/StatBars.svelte';
   import StatRowsMobile from './lib/StatRowsMobile.svelte';
@@ -51,6 +51,15 @@
   $: p1 = p1rank == null ? null : (PLAYERS.find(p => p.rank === p1rank) ?? null);
   $: p2 = p2rank == null ? null : (PLAYERS.find(p => p.rank === p2rank) ?? null);
   $: landing = !p1 && !p2; // nessuna selezione = schermata di benvenuto
+
+  // data di aggiornamento dati, formattata per la lingua corrente
+  $: dataUpdated = (() => {
+    if (!DATA_UPDATED) return null;
+    const [y, m, d] = DATA_UPDATED.split('-').map(Number);
+    const dt = new Date(y, m - 1, d);
+    const loc = lang === 'it' ? 'it-IT' : 'en-GB';
+    return new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'long', year: 'numeric' }).format(dt);
+  })();
   $: radarData = getTabRadarData(tab, lang);
 
   $: { localStorage.setItem('atpb50_tab', tab); }
@@ -255,6 +264,9 @@
       <div class="modal" role="dialog" aria-modal="true" aria-label={t.methTitle}>
         <button class="modal-close" on:click={() => (showMeth = false)} aria-label="Close">×</button>
         <h2 class="modal-title">{t.methTitle}</h2>
+        {#if dataUpdated}
+          <p class="modal-text modal-updated">{t.methUpdated} {dataUpdated}</p>
+        {/if}
         <p class="modal-text">{@html t.methP1}</p>
         <p class="modal-text">{@html t.methP2}</p>
       </div>
@@ -686,6 +698,13 @@
   .modal-text + .modal-text { margin-top: 10px; }
 
   .modal-text :global(strong) { color: var(--txt); font-weight: 500; }
+
+  /* riga "Dati aggiornati al …": in evidenza sotto il titolo */
+  .modal-updated {
+    color: var(--ink);
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
 
   /* ── MOBILE (modello V1 "Editorial") ── */
   @media (max-width: 760px) {

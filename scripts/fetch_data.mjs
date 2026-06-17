@@ -135,9 +135,14 @@ async function main() {
   const players = mergeSheets(sheets);
   console.log(`\nGiocatori: ${players.length}`);
 
+  // Data di aggiornamento (giorno locale di esecuzione del fetch): viene
+  // mostrata nella metodologia. In locale = oggi; via routine = il lunedì.
+  const now = new Date();
+  const updated = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
   mkdirSync(dirname(OUTPUT), { recursive: true });
-  writeFileSync(OUTPUT, JSON.stringify(players, null, 2), "utf-8");
-  console.log(`✓ Scritto: ${OUTPUT}`);
+  writeFileSync(OUTPUT, JSON.stringify({ updated, players }, null, 2), "utf-8");
+  console.log(`✓ Scritto: ${OUTPUT} (aggiornato al ${updated})`);
 
   if (players[0]) {
     const p = players[0];

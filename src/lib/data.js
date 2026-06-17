@@ -1,6 +1,9 @@
-import rawPlayers from '../data/players.json';
+import rawData from '../data/players.json';
 
-export const PLAYERS = rawPlayers;
+// players.json può essere un array (vecchio formato) o { updated, players }
+export const PLAYERS = Array.isArray(rawData) ? rawData : rawData.players;
+// Data di aggiornamento dei dati (YYYY-MM-DD) scritta dallo script di fetch
+export const DATA_UPDATED = Array.isArray(rawData) ? null : rawData.updated;
 
 // La lista selezionabile arriva fino alla 100, ma la media di riferimento
 // sul radar resta SEMPRE quella dei primi 50 del ranking (scelta utente).
