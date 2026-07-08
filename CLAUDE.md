@@ -99,6 +99,11 @@ Stile data-journalism serif (mockup: direzione B di "ATP Best 50 - Direzioni"; p
 - L'utente lavora in VS Code su Windows, in italiano
 - L'utente preferisce istruzioni passo-passo per i comandi git (non eseguirli al posto suo se chiede solo spiegazioni)
 
+## Routine schedulata di aggiornamento dati
+
+- Esiste una routine schedulata (Claude Code on the web) che esegue `npm run fetch-data`, verifica se `src/data/players.json` è cambiato e, in caso affermativo, committa e pusha su `main`.
+- **Notifica push ad ogni esecuzione, sempre** (override esplicito del comportamento di default "notifica solo se c'è qualcosa di rilevante"): l'utente vuole sapere l'esito di ogni run, sia che i dati siano stati aggiornati, sia che non ci fossero cambiamenti, sia in caso di errore (fetch fallito, push fallito, ecc.).
+
 ## Cose in sospeso / possibili sviluppi
 
 - H2H reale (dati head-to-head non ancora disponibili)
